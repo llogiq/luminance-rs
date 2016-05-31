@@ -17,13 +17,27 @@ struct Binding(u32);
 
 struct Statement;
 
+enum LetStatement {
+  Let(Type, Box<Expr>, Option<Box<LetStatement>>)
+}
+
 enum ControlStatement {
-  If(Box<Expr>, Box<Statement>, Option<IfRest>)
+  If(Box<Expr>, Box<Statement>, Option<IfRest>),
+  For(LetStatement, Box<Expr>, ForIterStatement),
+  While(Box<Expr>, Box<Statement>)
 }
 
 enum IfRest {
   Else(Box<Statement>),
-  Elif(Box<Expr>, Box<Statement>, Option<Box<IfRest>>),
+  ElseIf(Box<Expr>, Box<Statement>, Option<Box<IfRest>>),
+}
+
+enum ForIterStatement {
+  ForPostIter(Box<AssignStatement>, Option<Box<ForIterStatement>>)
+}
+
+enum AssignStatement {
+  Assign(Box<Expr>, Box<Expr>)
 }
 
 enum UnaOp {
