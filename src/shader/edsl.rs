@@ -10,7 +10,20 @@ enum Expr {
   UnaOp(UnaOp, Box<Expr>),
   BinOp(BinOp, Box<Expr>, Box<Expr>),
   TerOp(TerOp, Box<Expr>, Box<Expr>, Box<Expr>),
-  Fun(FunName, Vec<Box<Expr>>),
+  Fun(FunName, Box<[Box<Expr>]>),
+}
+
+struct Binding(u32);
+
+struct Statement;
+
+enum ControlStatement {
+  If(Box<Expr>, Box<Statement>, Option<IfRest>)
+}
+
+enum IfRest {
+  Else(Box<Statement>),
+  Elif(Box<Expr>, Box<Statement>, Option<Box<IfRest>>),
 }
 
 enum UnaOp {
@@ -31,9 +44,9 @@ enum TerOp {
 
 struct Fun {
   name: FunName,
-  ret_type: Type,
-  signature: Vec<Type>,
-  body: Option<Box<Expr>> // None if built-in
+  ret_type: Option<Type>,
+  signature: Box<[Type]>,
+  body: Option<()> // None if built-in // TODO
 }
 
 enum FunName {
@@ -68,5 +81,15 @@ enum Type {
   U32,
   F32,
   Bool,
-  Struct(Vec<Type>)
+  Struct(Box<[Type]>)
+}
+
+// sinf
+fn sin_def() -> Fun {
+  Fun {
+    name: FunName::Sin,
+    ret_type: Some(Type::F32),
+    signature: Box::new([Type::F32]),
+    body: None
+  }
 }
