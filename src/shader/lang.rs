@@ -15,7 +15,10 @@ enum Expr {
 
 struct Binding(u32);
 
-struct Statement;
+enum Statement {
+  LetStatement(LetStatement),
+  ControlStatement(ControlStatement),
+}
 
 enum LetStatement {
   Let(Type, Box<Expr>, Option<Box<LetStatement>>)
@@ -33,7 +36,11 @@ enum IfRest {
 }
 
 enum ForIterStatement {
-  ForIter(Box<LetStatement>, Option<Box<ForIterStatement>>)
+  ForIter(Box<AssignStatement>, Option<Box<ForIterStatement>>)
+}
+
+enum AssignStatement {
+  Assign(Box<Expr>, Box<Expr>)
 }
 
 enum UnaOp {
