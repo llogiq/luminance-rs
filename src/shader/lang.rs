@@ -33,11 +33,7 @@ enum IfRest {
 }
 
 enum ForIterStatement {
-  ForIter(Box<AssignStatement>, Option<Box<ForIterStatement>>)
-}
-
-enum AssignStatement {
-  Assign(Box<Expr>, Box<Expr>)
+  ForIter(Box<LetStatement>, Option<Box<ForIterStatement>>)
 }
 
 enum UnaOp {
