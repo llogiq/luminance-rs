@@ -18,6 +18,7 @@ struct Binding(u32);
 enum Statement {
   LetStatement(LetStatement),
   ControlStatement(ControlStatement),
+  AssignStatement(AssignStatement)
 }
 
 enum LetStatement {
