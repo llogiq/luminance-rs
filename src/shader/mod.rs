@@ -1,6 +1,6 @@
 //! Shader-related modules.
 
-pub mod edsl;
+pub mod lang;
 pub mod program;
 pub mod stage;
 pub mod uniform;
