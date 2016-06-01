@@ -2,7 +2,9 @@
 //!
 //! This module exports a  platform and technology independent home-made shading language.
 
-enum Expr {
+use std::marker::PhantomData;
+
+pub enum Expr {
   I32(i32),
   U32(u32),
   F32(f32),
@@ -13,61 +15,96 @@ enum Expr {
   Fun(FunName, Box<[Box<Expr>]>),
 }
 
-struct Binding(u32);
+pub struct E<T> {
+  expr: Expr,
+  _t: PhantomData<T>
+}
 
-enum Statement {
+impl<T> E<T> {
+  fn new(e: Expr) -> Self {
+    E {
+      expr: e,
+      _t: PhantomData
+    }
+  }
+}
+
+impl From<i32> for E<i32> {
+  fn from(a: i32) -> Self { E::new(Expr::I32(a)) }
+}
+
+impl From<u32> for E<u32> {
+  fn from(a: u32) -> Self { E::new(Expr::U32(a)) }
+}
+
+impl From<f32> for E<f32> {
+  fn from(a: f32) -> Self { E::new(Expr::F32(a)) }
+}
+
+impl From<bool> for E<bool> {
+  fn from(a: bool) -> Self { E::new(Expr::Bool(a)) }
+}
+
+fn test() {
+  let a = E::from(3);
+  let b = E::from(1);
+}
+
+pub struct Binding(u32);
+
+pub enum Statement {
   LetStatement(LetStatement),
   ControlStatement(ControlStatement),
   AssignStatement(AssignStatement)
 }
 
-enum LetStatement {
+pub enum LetStatement {
   Let(Type, Box<Expr>, Option<Box<LetStatement>>)
 }
 
-enum ControlStatement {
+pub enum ControlStatement {
   If(Box<Expr>, Box<Statement>, Option<IfRest>),
   For(LetStatement, Box<Expr>, ForIterStatement),
   While(Box<Expr>, Box<Statement>)
 }
 
-enum IfRest {
+pub enum IfRest {
   Else(Box<Statement>),
   ElseIf(Box<Expr>, Box<Statement>, Option<Box<IfRest>>),
 }
 
-enum ForIterStatement {
+pub enum ForIterStatement {
   ForIter(Box<AssignStatement>, Option<Box<ForIterStatement>>)
 }
 
-enum AssignStatement {
+pub enum AssignStatement {
   Assign(Box<Expr>, Box<Expr>)
 }
 
-enum UnaOp {
+pub enum UnaOp {
   Negate,
   Not,
 }
 
-enum BinOp {
+pub enum BinOp {
   Add,
   Sub,
   Mul,
   Div,
 }
 
-enum TerOp {
+pub enum TerOp {
   IfThenElse
 }
 
-struct Fun {
+pub struct Fun {
   name: FunName,
   ret_type: Option<Type>,
   signature: Box<[Type]>,
   body: Option<()> // None if built-in // TODO
 }
 
-enum FunName {
+pub enum FunName {
   Sin,
   Cos,
   Tan,
@@ -94,7 +131,7 @@ enum FunName {
   UserDefined(String)
 }
 
-enum Type {
+pub enum Type {
   I32,
   U32,
   F32,
