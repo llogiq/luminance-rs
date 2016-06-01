@@ -3,7 +3,7 @@
 //! This module exports a  platform and technology independent home-made shading language.
 
 use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Not, Sub};
 
 #[derive(Clone, Debug)]
 pub enum Expr {
@@ -88,6 +88,23 @@ impl<T> Neg for E<T> {
     E::new(Expr::UnaOp(UnaOp::Neg, Box::new(self.expr)))
   }
 }
+
+macro_rules! impl_not {
+  ($t:ty) => {
+    impl Not for E<$t> {
+      type Output = E<$t>;
+
+      fn not(self) -> Self::Output {
+        E::new(Expr::UnaOp(UnaOp::Not, Box::new(self.expr)))
+      }
+    }
+  }
+}
+
+impl_not!(bool);
+impl_not!([bool; 2]);
+impl_not!([bool; 3]);
+impl_not!([bool; 4]);
 
 fn test() {
   let a = E::from(3);
