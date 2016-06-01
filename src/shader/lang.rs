@@ -3,7 +3,7 @@
 //! This module exports a  platform and technology independent home-made shading language.
 
 use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Clone, Debug)]
 pub enum Expr {
@@ -81,6 +81,13 @@ impl_muldiv!(Div, div, 2);
 impl_muldiv!(Div, div, 3);
 impl_muldiv!(Div, div, 4);
 
+impl<T> Neg for E<T> {
+  type Output = E<T>;
+
+  fn neg(self) -> Self::Output {
+    E::new(Expr::UnaOp(UnaOp::Neg, Box::new(self.expr)))
+  }
+}
 
 fn test() {
   let a = E::from(3);
@@ -129,7 +136,7 @@ pub enum AssignStatement {
 
 #[derive(Clone, Debug)]
 pub enum UnaOp {
-  Negate,
+  Neg,
   Not,
 }
 
