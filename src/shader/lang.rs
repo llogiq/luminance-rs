@@ -18,6 +18,7 @@ pub enum Expr {
   Vec2(Box<Expr>, Box<Expr>),
   Vec3(Box<Expr>, Box<Expr>, Box<Expr>),
   Vec4(Box<Expr>, Box<Expr>, Box<Expr>, Box<Expr>),
+  Swizzle(Swizzle, Box<Expr>)
 }
 
 #[derive(Clone, Debug)]
@@ -155,6 +156,22 @@ pub enum AssignStatement {
 pub enum UnaOp {
   Neg,
   Not,
+  Swizzle(Swizzle)
+}
+
+#[derive(Clone, Debug)]
+pub enum Swizzle {
+  SW1(SwizzleXYZ),
+  SW2(SwizzleXYZ, SwizzleXYZ),
+  SW3(SwizzleXYZ, SwizzleXYZ, SwizzleXYZ),
+  SW4(SwizzleXYZ, SwizzleXYZ, SwizzleXYZ, SwizzleXYZ)
+}
+
+#[derive(Clone, Debug)]
+pub enum SwizzleXYZ {
+  X,
+  Y,
+  Z,
 }
 
 #[derive(Clone, Debug)]
