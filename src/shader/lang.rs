@@ -119,9 +119,10 @@ pub struct Binding(u32);
 
 #[derive(Clone, Debug)]
 pub enum Statement {
-  LetStatement(LetStatement),
-  ControlStatement(ControlStatement),
-  AssignStatement(AssignStatement)
+  LetStatement(LetStatement, Option<Box<Statement>>),
+  ControlStatement(ControlStatement, Option<Box<Statement>>),
+  AssignStatement(AssignStatement, Option<Box<Statement>>),
+  Return(Box<Expr>)
 }
 
 #[derive(Clone, Debug)]
@@ -192,7 +193,7 @@ pub struct Fun {
   name: FunName,
   ret_type: Option<Type>,
   signature: Box<[Type]>,
-  body: Option<()> // None if built-in // TODO
+  body: Option<Statement> // None if built-in // TODO
 }
 
 #[derive(Clone, Debug)]
@@ -220,7 +221,7 @@ pub enum FunName {
   Round,
   Ceil,
   Fract,
-  UserDefined(String)
+  UserDefined(Binding)
 }
 
 #[derive(Clone, Debug)]
