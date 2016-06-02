@@ -330,38 +330,6 @@ macro_rules! sl {
   () => {{}};
 }
 
-/// Parse an SL expression.
-macro_rules! sl_expr {
-  //// add
-  //($a:tt + $b:tt $($r:tt)*) => {
-  //  sl_expr!( sl_expr!($a) + sl_expr!($b) $($r)* )
-  //};
-
-  //// sub
-  //($a:tt - $b:tt $($r:tt)*) => {
-  //  sl_expr!( $a - $b $($r)* )
-  //};
-
-  //// mul
-  //($a:tt * $b:tt $($r:tt)*) => {
-  //  sl_expr!( sl_expr!($a) * sl_expr!($b) $($r)* )
-  //};
-
-  //// div
-  //($a:tt / $b:tt $($r:tt)*) => {
-  //  sl_expr!( sl_expr!($a) / sl_expr!($b) $($r)* )
-  //};
-
-  //// parens
-  //(($($a:tt)+) $($r:tt)*) => {
-  //  ( sl_expr!($(a)+) ) sl_expr!($($r)*)
-  //};
-
-  // function application
-  ($a:ident ( $($arg:expr),* ) $($r:tt)*) => {
-  };
-}
-
 struct ShaderParser {
   pub var_id: u32
 }
@@ -372,14 +340,4 @@ impl ShaderParser {
       var_id: 0
     }
   }
-}
-
-fn test() {
-  let vs = sl!{
-    let i: u32 = E::from(1);
-    let j: u32 = E::from(3);
-  };
-
-  let foo = ||{};
-  let e = sl_expr!{ foo(3) };
 }
