@@ -114,7 +114,7 @@ fn test() {
   let d = a - b;
 }
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Binding(u32);
 
 #[derive(Clone, Debug)]
