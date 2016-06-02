@@ -259,6 +259,7 @@ fn sin_def() -> Fun {
   }
 }
 
+/// SL grammar.
 macro_rules! sl {
   // input declaration
   (@let in $i:ident : $t:ty; $($r:tt)*) => {{
@@ -276,8 +277,8 @@ macro_rules! sl {
   // variable declaration
   (@ $g:ident let $i:ident : $t:ty = $v:expr; $($r:tt)*) => {{
     // retrieve a variable and increment it for later uses
-    let var_id = $g;
-    $g = $g + 1;
+    let var_id = $g.var_id;
+    $g.var_id = $g.var_id + 1;
 
     // insert the new variable
     let let_st = LetStatement::Let(<$t as ReifyType>::reify_type(), Box::new($v.expr), None);
@@ -319,20 +320,66 @@ macro_rules! sl {
 
   // initial parser
   ($($t:tt)+) => {{
-    let mut var_id: u32 = 0;
+    let mut parser = ShaderParser::new();
     //let mut ast = 
 
-    sl!(@ var_id $($t)+)
+    sl!(@ parser $($t)+)
   }};
 
   // terminal parser
   () => {{}};
 }
 
+/// Parse an SL expression.
+macro_rules! sl_expr {
+  //// add
+  //($a:tt + $b:tt $($r:tt)*) => {
+  //  sl_expr!( sl_expr!($a) + sl_expr!($b) $($r)* )
+  //};
+
+  //// sub
+  //($a:tt - $b:tt $($r:tt)*) => {
+  //  sl_expr!( $a - $b $($r)* )
+  //};
+
+  //// mul
+  //($a:tt * $b:tt $($r:tt)*) => {
+  //  sl_expr!( sl_expr!($a) * sl_expr!($b) $($r)* )
+  //};
+
+  //// div
+  //($a:tt / $b:tt $($r:tt)*) => {
+  //  sl_expr!( sl_expr!($a) / sl_expr!($b) $($r)* )
+  //};
+
+  //// parens
+  //(($($a:tt)+) $($r:tt)*) => {
+  //  ( sl_expr!($(a)+) ) sl_expr!($($r)*)
+  //};
+
+  // function application
+  ($a:ident ( $($arg:expr),* ) $($r:tt)*) => {
+  };
+}
+
+struct ShaderParser {
+  pub var_id: u32
+}
+
+impl ShaderParser {
+  pub fn new() -> Self {
+    ShaderParser {
+      var_id: 0
+    }
+  }
+}
+
 fn test() {
   let vs = sl!{
     let i: u32 = E::from(1);
     let j: u32 = E::from(3);
-    let s: u32 = i + j;
   };
+
+  let foo = ||{};
+  let e = sl_expr!{ foo(3) };
 }
