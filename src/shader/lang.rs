@@ -37,23 +37,23 @@ impl<T> E<T> {
 }
 
 pub trait ReifyType {
-  fn reify_type(&self) -> Type;
+  fn reify_type() -> Type;
 }
 
-impl ReifyType for E<i32> {
-  fn reify_type(&self) -> Type { Type::I32 }
+impl ReifyType for i32 {
+  fn reify_type() -> Type { Type::I32 }
 }
 
-impl ReifyType for E<u32> {
-  fn reify_type(&self) -> Type { Type::U32 }
+impl ReifyType for u32 {
+  fn reify_type() -> Type { Type::U32 }
 }
 
-impl ReifyType for E<f32> {
-  fn reify_type(&self) -> Type { Type::F32 }
+impl ReifyType for f32 {
+  fn reify_type() -> Type { Type::F32 }
 }
 
-impl ReifyType for E<bool> {
-  fn reify_type(&self) -> Type { Type::Bool }
+impl ReifyType for bool {
+  fn reify_type() -> Type { Type::Bool }
 }
 
 macro_rules! impl_from {
@@ -261,7 +261,8 @@ fn sin_def() -> Fun {
 
 macro_rules! sl {
   // input declaration
-  (@let in $i:ident : $t:ty;) => {{
+  (@let in $i:ident : $t:ty; $($r:tt)*) => {{
+    sl!($($r)*)
   }};
 
   // out declaration
@@ -273,7 +274,14 @@ macro_rules! sl {
   }};
 
   // variable declaration
-  (@let $i:ident : $t:ty = $v:expr; $($r:tt)*) => {{
+  (@ $g:ident let $i:ident : $t:ty = $v:expr; $($r:tt)*) => {{
+    // retrieve a variable and increment it for later uses
+    let var_id = $g;
+    $g = $g + 1;
+
+    // insert the new variable
+    let let_st = LetStatement::Let(<$t as ReifyType>::reify_type(), Box::new($v.expr), None);
+
     sl!($($r)*)
   }};
 
@@ -311,7 +319,10 @@ macro_rules! sl {
 
   // initial parser
   ($($t:tt)+) => {{
-    sl!(@$($t)+)
+    let mut var_id: u32 = 0;
+    //let mut ast = 
+
+    sl!(@ var_id $($t)+)
   }};
 
   // terminal parser
@@ -320,7 +331,8 @@ macro_rules! sl {
 
 fn test() {
   let vs = sl!{
-    let i: u32 = 0;
-    let z: u32 = 0;
+    let i: u32 = E::from(1);
+    let j: u32 = E::from(3);
+    let s: u32 = i + j;
   };
 }
