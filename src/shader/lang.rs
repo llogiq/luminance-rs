@@ -36,6 +36,26 @@ impl<T> E<T> {
   }
 }
 
+pub trait ReifyType {
+  fn reify_type(&self) -> Type;
+}
+
+impl ReifyType for E<i32> {
+  fn reify_type(&self) -> Type { Type::I32 }
+}
+
+impl ReifyType for E<u32> {
+  fn reify_type(&self) -> Type { Type::U32 }
+}
+
+impl ReifyType for E<f32> {
+  fn reify_type(&self) -> Type { Type::F32 }
+}
+
+impl ReifyType for E<bool> {
+  fn reify_type(&self) -> Type { Type::Bool }
+}
+
 macro_rules! impl_from {
   ($t:ty, $variant:ident) => {
     impl From<$t> for E<$t> {
@@ -106,13 +126,6 @@ impl_not!(bool);
 impl_not!([bool; 2]);
 impl_not!([bool; 3]);
 impl_not!([bool; 4]);
-
-fn test() {
-  let a = E::from(3);
-  let b = E::from(1);
-  let c = a.clone() + b.clone();
-  let d = a - b;
-}
 
 #[derive(Copy, Clone, Debug)]
 pub struct Binding(u32);
@@ -230,6 +243,9 @@ pub enum Type {
   U32,
   F32,
   Bool,
+  Vec2(Box<Type>),
+  Vec3(Box<Type>),
+  Vec4(Box<Type>),
   Struct(Box<[Type]>)
 }
 
@@ -240,5 +256,21 @@ fn sin_def() -> Fun {
     ret_type: Some(Type::F32),
     signature: Box::new([Type::F32]),
     body: None
+  }
+}
+
+macro_rules! sl {
+  (@let ($var_id:ident) ($name:ident, $e:expr)) => {{
+  }};
+
+  ($( $v:tt $a:tt; )+) => {{
+    let mut var_id = 0;
+    $( sl!(@$v (var_id) $a) )+
+  }};
+}
+
+fn test() {
+  sl!{
+    let (i, 3);
   }
 }
