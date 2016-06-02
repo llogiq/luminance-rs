@@ -260,17 +260,62 @@ fn sin_def() -> Fun {
 }
 
 macro_rules! sl {
-  (@let ($var_id:ident) ($name:ident, $e:expr)) => {{
+  // input declaration
+  (let in $i:ident : $t:ty;) => {{
   }};
 
-  ($( $v:tt $a:tt; )+) => {{
-    let mut var_id = 0;
-    $( sl!(@$v (var_id) $a) )+
+  // out declaration
+  (let out $i:ident : $t:ty;) => {{
   }};
+
+  // uniform declaration
+  (uniform $i:ident : $t:ty;) => {{
+  }};
+
+  // variable declaration
+  (let $i:ident : $t:ty = $v:expr; $($r:tt)*) => {{
+    sl!($($r)*)
+  }};
+
+  // function declaration
+  (fn $i:ident ($(,)*) -> $ret_type:ty { $($st:stmt)* }) => {{
+  }};
+
+  // early return
+  (return $e:expr;) => {{
+  }};
+
+  // assignment
+  ($v:ident = $e:expr;) => {{
+  }};
+
+  // when
+  (when ($cond:expr) { $($st:stmt)* }) => {{
+  }};
+
+  // unless
+  (unless ($cond:expr) { $($st:stmt)* }) => {{
+  }};
+
+  // if else
+  (if ($cond:expr) { $($st_if:stmt)* } else { $($st_else:stmt)* }) => {{
+  }};
+
+  // for loop
+  (for ($i:ident : $t:ty = $e:expr ; $cond:expr ; $post_st:stmt) { $($body_st:stmt)* }) => {{
+  }};
+
+  // while loop
+  (while ($cond:expr) { $($body_st:stmt)* }) => {{
+  }};
+
+  // terminal parser
+  () => {{}}
 }
 
 fn test() {
-  sl!{
-    let (i, 3);
-  }
+  let vs = sl!{
+    let i: u32 = 0;
+    let z: u32 = 0;
+  };
 }
