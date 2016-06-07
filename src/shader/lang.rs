@@ -37,23 +37,23 @@ impl<T> E<T> {
 }
 
 pub trait ReifyType {
-  fn reify_type() -> Type;
+  fn reify_type(&self) -> Type;
 }
 
-impl ReifyType for i32 {
-  fn reify_type() -> Type { Type::I32 }
+impl ReifyType for E<i32> {
+  fn reify_type(&self) -> Type { Type::I32 }
 }
 
-impl ReifyType for u32 {
-  fn reify_type() -> Type { Type::U32 }
+impl ReifyType for E<u32> {
+  fn reify_type(&self) -> Type { Type::U32 }
 }
 
-impl ReifyType for f32 {
-  fn reify_type() -> Type { Type::F32 }
+impl ReifyType for E<f32> {
+  fn reify_type(&self) -> Type { Type::F32 }
 }
 
-impl ReifyType for bool {
-  fn reify_type() -> Type { Type::Bool }
+impl ReifyType for E<bool> {
+  fn reify_type(&self) -> Type { Type::Bool }
 }
 
 macro_rules! impl_from {
@@ -140,9 +140,9 @@ pub struct Binding(u32);
 
 #[derive(Clone, Debug)]
 pub enum Statement {
-  LetStatement(LetStatement, Option<Box<Statement>>),
-  ControlStatement(ControlStatement, Option<Box<Statement>>),
-  AssignStatement(AssignStatement, Option<Box<Statement>>),
+  LetStatement(LetStatement),
+  ControlStatement(ControlStatement),
+  AssignStatement(AssignStatement),
   Return(Box<Expr>)
 }
 
@@ -285,6 +285,7 @@ macro_rules! sl_eval {
   // variable declaration
   ($ast:ident let $i:ident = $e:expr; $($r:tt)*) => {{
     let $i = E::from($e);
+    $ast.push(Statement::LetStatement(LetStatement::Let($i.reify_type(), Box::new($i.expr), None)));
     sl_eval!($ast $($r)*)
   }};
 
@@ -326,7 +327,7 @@ macro_rules! sl_eval {
 
 macro_rules! sl_fun_def {
   ($($t:tt)*) => {{
-    let ast: Vec<Statement> = Vec::new();
+    let mut ast: Vec<Statement> = Vec::new();
     sl_eval!(ast $($t)*);
     ast
   }}
@@ -335,6 +336,5 @@ macro_rules! sl_fun_def {
 fn test() {
   let ast = sl_fun_def! {
     let i = 0;
-    let y = i.clone() + i.clone();
   };
 }
