@@ -262,82 +262,62 @@ fn sin_def() -> Fun {
 /// SL grammar.
 macro_rules! sl {
   // input declaration
-  (@let in $i:ident : $t:ty; $($r:tt)*) => {{
+  (let in $i:ident : $t:ty; $($r:tt)*) => {{
     sl!($($r)*)
   }};
 
   // out declaration
-  (@let out $i:ident : $t:ty;) => {{
+  (let out $i:ident : $t:ty;) => {{
   }};
 
   // uniform declaration
-  (@uniform $i:ident : $t:ty;) => {{
+  (uniform $i:ident : $t:ty;) => {{
   }};
 
   // variable declaration
-  (@ $g:ident let $i:ident : $t:ty = $v:expr; $($r:tt)*) => {{
-    // retrieve a variable and increment it for later uses
-    let var_id = $g.var_id;
-    $g.var_id = $g.var_id + 1;
-
-    // insert the new variable
-    let let_st = LetStatement::Let(<$t as ReifyType>::reify_type(), Box::new($v.expr), None);
-
+  (let $i:ident = $e:expr; $($r:tt)*) => {{
+    let $i = E::from($e);
     sl!($($r)*)
   }};
 
   // function declaration
-  (@fn $i:ident ($(,)*) -> $ret_type:ty { $($st:stmt)* }) => {{
+  (fn $i:ident ($(,)*) -> $ret_type:ty { $($st:stmt)* }) => {{
   }};
 
   // early return
-  (@return $e:expr;) => {{
+  (return $e:expr;) => {{
   }};
 
   // assignment
-  (@$v:ident = $e:expr;) => {{
+  ($v:ident = $e:expr;) => {{
   }};
 
   // when
-  (@when ($cond:expr) { $($st:stmt)* }) => {{
+  (when ($cond:expr) { $($st:stmt)* }) => {{
   }};
 
   // unless
-  (@unless ($cond:expr) { $($st:stmt)* }) => {{
+  (unless ($cond:expr) { $($st:stmt)* }) => {{
   }};
 
   // if else
-  (@if ($cond:expr) { $($st_if:stmt)* } else { $($st_else:stmt)* }) => {{
+  (if ($cond:expr) { $($st_if:stmt)* } else { $($st_else:stmt)* }) => {{
   }};
 
   // for loop
-  (@for ($i:ident : $t:ty = $e:expr ; $cond:expr ; $post_st:stmt) { $($body_st:stmt)* }) => {{
+  (for ($i:ident : $t:ty = $e:expr ; $cond:expr ; $post_st:stmt) { $($body_st:stmt)* }) => {{
   }};
 
   // while loop
-  (@while ($cond:expr) { $($body_st:stmt)* }) => {{
+  (while ($cond:expr) { $($body_st:stmt)* }) => {{
   }};
 
-  // initial parser
-  ($($t:tt)+) => {{
-    let mut parser = ShaderParser::new();
-    //let mut ast = 
-
-    sl!(@ parser $($t)+)
-  }};
-
-  // terminal parser
-  () => {{}};
+  // terminal macro
+  () => {{ }}
 }
 
-struct ShaderParser {
-  pub var_id: u32
-}
-
-impl ShaderParser {
-  pub fn new() -> Self {
-    ShaderParser {
-      var_id: 0
-    }
+fn test() {
+  sl!{
+    let a = 3;
   }
 }
