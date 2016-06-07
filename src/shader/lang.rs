@@ -268,66 +268,73 @@ fn sin_def() -> Fun {
 }
 
 /// SL grammar.
-macro_rules! sl {
+macro_rules! sl_eval {
   // input declaration
-  (let in $i:ident : $t:ty; $($r:tt)*) => {{
-    sl!($($r)*)
+  ($ast:ident let in $i:ident : $t:ty; $($r:tt)*) => {{
+    sl_eval!($($r)*)
   }};
 
   // out declaration
-  (let out $i:ident : $t:ty;) => {{
+  ($ast:ident let out $i:ident : $t:ty;) => {{
   }};
 
   // uniform declaration
-  (uniform $i:ident : $t:ty;) => {{
+  ($ast:ident uniform $i:ident : $t:ty;) => {{
   }};
 
   // variable declaration
-  (let $i:ident = $e:expr; $($r:tt)*) => {{
+  ($ast:ident let $i:ident = $e:expr; $($r:tt)*) => {{
     let $i = E::from($e);
-    sl!($($r)*)
+    sl_eval!($ast $($r)*)
   }};
 
   // function declaration
-  (fn $i:ident ($(,)*) -> $ret_type:ty { $($st:stmt)* }) => {{
+  ($ast:ident fn $i:ident ($(,)*) -> $ret_type:ty { $($st:stmt)* }) => {{
   }};
 
   // early return
-  (return $e:expr;) => {{
+  ($ast:ident return $e:expr;) => {{
   }};
 
   // assignment
-  ($v:ident = $e:expr;) => {{
+  ($ast:ident $v:ident = $e:expr;) => {{
   }};
 
   // when
-  (when ($cond:expr) { $($st:stmt)* }) => {{
+  ($ast:ident when ($cond:expr) { $($st:stmt)* }) => {{
   }};
 
   // unless
-  (unless ($cond:expr) { $($st:stmt)* }) => {{
+  ($ast:ident unless ($cond:expr) { $($st:stmt)* }) => {{
   }};
 
   // if else
-  (if ($cond:expr) { $($st_if:stmt)* } else { $($st_else:stmt)* }) => {{
+  ($ast:ident if ($cond:expr) { $($st_if:stmt)* } else { $($st_else:stmt)* }) => {{
   }};
 
   // for loop
-  (for ($i:ident : $t:ty = $e:expr ; $cond:expr ; $post_st:stmt) { $($body_st:stmt)* }) => {{
+  ($ast:ident for ($i:ident : $t:ty = $e:expr ; $cond:expr ; $post_st:stmt) { $($body_st:stmt)* }) => {{
   }};
 
   // while loop
-  (while ($cond:expr) { $($body_st:stmt)* }) => {{
+  ($ast:ident while ($cond:expr) { $($body_st:stmt)* }) => {{
   }};
 
   // terminal macro
-  () => {{ }}
+  ($ast:ident) => {{ }}
+}
+
+macro_rules! sl_fun_def {
+  ($($t:tt)*) => {{
+    let ast: Vec<Statement> = Vec::new();
+    sl_eval!(ast $($t)*);
+    ast
+  }}
 }
 
 fn test() {
-  sl!{
-    let a = 3;
-    let b = 1;
-    let c = a * b;
-  }
+  let ast = sl_fun_def! {
+    let i = 0;
+    let y = i.clone() + i.clone();
+  };
 }
