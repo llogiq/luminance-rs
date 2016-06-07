@@ -69,7 +69,7 @@ impl_from!(u32, U32);
 impl_from!(f32, F32);
 impl_from!(bool, Bool);
 
-macro_rules! impl_addsub {
+macro_rules! impl_scalar {
   ($trait_name:ident, $method:ident) => {
     impl<T> $trait_name<E<T>> for E<T> where T: $trait_name {
       type Output = E<T>;
@@ -81,7 +81,7 @@ macro_rules! impl_addsub {
   }
 }
 
-macro_rules! impl_muldiv {
+macro_rules! impl_array {
   ($trait_name:ident, $method:ident, $dim:expr) => {
     impl<T> $trait_name<E<T>> for E<[T; $dim]> {
       type Output = E<[T; $dim]>;
@@ -93,14 +93,22 @@ macro_rules! impl_muldiv {
   }
 }
 
-impl_addsub!(Add, add);
-impl_addsub!(Sub, sub);
-impl_muldiv!(Mul, mul, 2);
-impl_muldiv!(Mul, mul, 3);
-impl_muldiv!(Mul, mul, 4);
-impl_muldiv!(Div, div, 2);
-impl_muldiv!(Div, div, 3);
-impl_muldiv!(Div, div, 4);
+impl_scalar!(Add, add);
+impl_scalar!(Sub, sub);
+impl_scalar!(Mul, mul);
+impl_scalar!(Div, div);
+impl_array!(Add, add, 2);
+impl_array!(Add, add, 3);
+impl_array!(Add, add, 4);
+impl_array!(Sub, sub, 2);
+impl_array!(Sub, sub, 3);
+impl_array!(Sub, sub, 4);
+impl_array!(Mul, mul, 2);
+impl_array!(Mul, mul, 3);
+impl_array!(Mul, mul, 4);
+impl_array!(Div, div, 2);
+impl_array!(Div, div, 3);
+impl_array!(Div, div, 4);
 
 impl<T> Neg for E<T> {
   type Output = E<T>;
@@ -320,6 +328,6 @@ fn test() {
   sl!{
     let a = 3;
     let b = 1;
-    let c = a + b;
+    let c = a * b;
   }
 }
