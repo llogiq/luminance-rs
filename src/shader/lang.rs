@@ -71,7 +71,7 @@ impl_from!(bool, Bool);
 
 macro_rules! impl_addsub {
   ($trait_name:ident, $method:ident) => {
-    impl<T> $trait_name<E<T>> for E<T> {
+    impl<T> $trait_name<E<T>> for E<T> where T: $trait_name {
       type Output = E<T>;
     
       fn $method(self, rhs: E<T>) -> Self::Output {
@@ -319,5 +319,7 @@ macro_rules! sl {
 fn test() {
   sl!{
     let a = 3;
+    let b = 1;
+    let c = a + b;
   }
 }
