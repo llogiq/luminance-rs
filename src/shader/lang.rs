@@ -295,6 +295,7 @@ fn sin_def() -> Fun {
 }
 
 /// SL grammar.
+#[macro_export]
 macro_rules! sl_eval {
   // input declaration
   ($ast:ident let in $i:ident : $t:ty; $($r:tt)*) => {{
@@ -312,8 +313,8 @@ macro_rules! sl_eval {
   // variable declaration
   ($ast:ident let $i:ident = $e:expr; $($r:tt)*) => {{
     let $i = E::from($e);
-    let ast2 = $ast.map(|a| a.push(Statement::new_let($i.reify_type(), $i)));
-    sl_eval!(ast2 $($r)*)
+    let ast = $ast.push(Statement::new_let($i.reify_type(), $i));
+    sl_eval!(ast $($r)*)
   }};
 
   // function declaration
@@ -352,15 +353,10 @@ macro_rules! sl_eval {
   ($ast:ident) => {{ $ast }}
 }
 
+#[macro_export]
 macro_rules! sl_fun_def {
   ($($t:tt)*) => {{
-    let ast: Option<Statement> = None;
-    sl_eval!(ast $($t)*);
+    let ast: Statement = Statement::new_let(Type::Bool, E::from(false));
+    sl_eval!(ast $($t)*)
   }}
-}
-
-fn test() {
-  let ast = sl_fun_def! {
-    let i = 0;
-  };
 }
