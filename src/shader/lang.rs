@@ -33,6 +33,10 @@ impl<T> E<T> {
       _t: PhantomData
     }
   }
+
+  pub fn eq(&self, rhs: &Self) -> E<bool> {
+    E::new(Expr::BinOp(BinOp::Eq, Box::new(self.expr.clone()), Box::new(rhs.expr.clone())))
+  }
 }
 
 pub trait ReifyType {
@@ -261,10 +265,15 @@ pub enum SwizzleXYZ {
 
 #[derive(Clone, Debug)]
 pub enum BinOp {
-  Add,
-  Sub,
-  Mul,
-  Div,
+  Add, // +
+  Sub, // -
+  Mul, // *
+  Div, // /
+  LT, // <
+  LTE, // <=
+  GT, // >
+  GTE, // >=
+  Eq, // ==
 }
 
 #[derive(Clone, Debug)]
