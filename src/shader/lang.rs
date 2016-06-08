@@ -140,6 +140,7 @@ pub struct Binding(u32);
 
 #[derive(Clone, Debug)]
 pub enum Statement {
+  Empty,
   LetStatement(LetStatement, Option<Box<Statement>>),
   ControlStatement(ControlStatement, Option<Box<Statement>>),
   AssignStatement(AssignStatement, Option<Box<Statement>>),
@@ -153,12 +154,21 @@ fn map_def<T, U, F>(option: Option<T>, default: U, f: F) -> Option<U> where F: F
 }
 
 impl Statement {
+  pub fn new() -> Self {
+    Statement::Empty
+  }
+
   pub fn new_let<T>(t: Type, e: E<T>) -> Self {
     Statement::LetStatement(LetStatement::Let(t, Box::new(e.expr)), None)
   }
 
+  pub fn new_if_else(cond: E<bool>, st_true: Statement, st_false: Statement) -> Self {
+    Statement::ControlStatement(ControlStatement::If(Box::new(cond.expr), Box::new(st_true), Some(IfRest::Else(Box::new(st_false)))), None)
+  }
+
   pub fn push(self, st: Self) -> Self {
     match self {
+      Statement::Empty => st,
       Statement::LetStatement(let_st, next_st) => Statement::LetStatement(let_st, Self::option_push(next_st, st)),
       Statement::ControlStatement(ctrl_st, next_st) => Statement::ControlStatement(ctrl_st, Self::option_push(next_st, st)),
       Statement::AssignStatement(asg_st, next_st) => Statement::AssignStatement(asg_st, Self::option_push(next_st, st))
@@ -338,7 +348,12 @@ macro_rules! sl_eval {
   }};
 
   // if else
-  ($ast:ident if ($cond:expr) { $($st_if:stmt)* } else { $($st_else:stmt)* }) => {{
+  ($ast:ident if ($cond:expr) { $($st_true:tt)* } else { $($st_false:tt)* $($r:tt)* }) => {{
+    let st_true = sl!($($st_true)*);
+    let st_false = sl!($($st_false)*);
+    let ast = $ast.push(Statement::new_if_else(E::from($cond), st_true, st_false));
+
+    sl_eval!(ast $($r)*)
   }};
 
   // for loop
@@ -354,9 +369,9 @@ macro_rules! sl_eval {
 }
 
 #[macro_export]
-macro_rules! sl_fun_def {
+macro_rules! sl {
   ($($t:tt)*) => {{
-    let ast: Statement = Statement::new_let(Type::Bool, E::from(false));
+    let ast: Statement = Statement::new();
     sl_eval!(ast $($t)*)
   }}
 }
