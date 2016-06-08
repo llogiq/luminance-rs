@@ -159,6 +159,7 @@ pub enum Statement {
   LetStatement(LetStatement, Option<Box<Statement>>),
   ControlStatement(ControlStatement, Option<Box<Statement>>),
   AssignStatement(AssignStatement, Option<Box<Statement>>),
+  Return(Box<Expr>)
 }
 
 fn map_def<T, U, F>(option: Option<T>, default: U, f: F) -> Option<U> where F: FnOnce(T) -> U {
@@ -186,7 +187,8 @@ impl Statement {
       Statement::Empty => st,
       Statement::LetStatement(let_st, next_st) => Statement::LetStatement(let_st, Self::option_push(next_st, st)),
       Statement::ControlStatement(ctrl_st, next_st) => Statement::ControlStatement(ctrl_st, Self::option_push(next_st, st)),
-      Statement::AssignStatement(asg_st, next_st) => Statement::AssignStatement(asg_st, Self::option_push(next_st, st))
+      Statement::AssignStatement(asg_st, next_st) => Statement::AssignStatement(asg_st, Self::option_push(next_st, st)),
+      a@Statement::Return(..) => a // short-circuit what’s next
     }
   }
 
