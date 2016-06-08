@@ -1,6 +1,6 @@
 //! Embedded domain specific language for shading.
 //!
-//! This module exports a  platform and technology independent home-made shading language.
+//! This module exports a platform and technology independent shading language.
 
 use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Neg, Not, Sub};
