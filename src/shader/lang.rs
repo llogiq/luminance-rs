@@ -182,6 +182,10 @@ impl Statement {
     Statement::ControlStatement(ControlStatement::If(Box::new(cond.expr), Box::new(st_true), Some(IfRest::Else(Box::new(st_false)))), None)
   }
 
+  pub fn new_return<T>(e: E<T>) -> Self {
+    Statement::Return(Box::new(e.expr))
+  }
+
   pub fn push(self, st: Self) -> Self {
     match self {
       Statement::Empty => st,
@@ -344,7 +348,9 @@ macro_rules! sl_eval {
   }};
 
   // early return
-  ($ast:ident return $e:expr;) => {{
+  ($ast:ident return $e:expr; $($r:tt)*) => {{
+    let ast = $ast.push(Statement::new_return(E::from($e)));
+    sl_eval!(ast $($r)*)
   }};
 
   // assignment
