@@ -110,13 +110,30 @@ impl_outer!(Div, div, 2);
 impl_outer!(Div, div, 3);
 impl_outer!(Div, div, 4);
 
-impl<T> Neg for E<T> {
-  type Output = E<T>;
-
-  fn neg(self) -> Self::Output {
-    E::new(Expr::UnaOp(UnaOp::Neg, Box::new(self.expr)))
+macro_rules! impl_neg {
+  ($t:ty) => {
+    impl Neg for E<$t> {
+      type Output = E<$t>;
+    
+      fn neg(self) -> Self::Output {
+        E::new(Expr::UnaOp(UnaOp::Neg, Box::new(self.expr)))
+      }
+    }
   }
 }
+
+impl_neg!(i32);
+impl_neg!([i32; 2]);
+impl_neg!([i32; 3]);
+impl_neg!([i32; 4]);
+impl_neg!(u32);
+impl_neg!([u32; 2]);
+impl_neg!([u32; 3]);
+impl_neg!([u32; 4]);
+impl_neg!(f32);
+impl_neg!([f32; 2]);
+impl_neg!([f32; 3]);
+impl_neg!([f32; 4]);
 
 macro_rules! impl_not {
   ($t:ty) => {
