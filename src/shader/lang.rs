@@ -154,7 +154,7 @@ pub enum LetStatement {
 #[derive(Clone, Debug)]
 pub enum ControlStatement {
   If(Box<Expr>, Box<Statement>, Option<IfRest>),
-  For(LetStatement, Box<Expr>, ForIterStatement),
+  For(LetStatement, Box<Expr>, ForIterStatement, Box<Statement>),
   While(Box<Expr>, Box<Statement>)
 }
 
