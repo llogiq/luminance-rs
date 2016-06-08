@@ -13,12 +13,10 @@ pub enum Expr {
   Bool(bool),
   UnaOp(UnaOp, Box<Expr>),
   BinOp(BinOp, Box<Expr>, Box<Expr>),
-  TerOp(TerOp, Box<Expr>, Box<Expr>, Box<Expr>),
   Fun(FunName, Box<[Box<Expr>]>),
   Vec2(Box<Expr>, Box<Expr>),
   Vec3(Box<Expr>, Box<Expr>, Box<Expr>),
   Vec4(Box<Expr>, Box<Expr>, Box<Expr>, Box<Expr>),
-  Swizzle(Swizzle, Box<Expr>)
 }
 
 #[derive(Clone, Debug)]
@@ -256,11 +254,6 @@ pub enum BinOp {
   Sub,
   Mul,
   Div,
-}
-
-#[derive(Clone, Debug)]
-pub enum TerOp {
-  IfThenElse
 }
 
 #[derive(Clone, Debug)]
