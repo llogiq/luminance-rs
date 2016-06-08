@@ -140,10 +140,33 @@ pub struct Binding(u32);
 
 #[derive(Clone, Debug)]
 pub enum Statement {
-  LetStatement(LetStatement),
-  ControlStatement(ControlStatement),
-  AssignStatement(AssignStatement),
-  Return(Box<Expr>)
+  LetStatement(LetStatement, Option<Box<Statement>>),
+  ControlStatement(ControlStatement, Option<Box<Statement>>),
+  AssignStatement(AssignStatement, Option<Box<Statement>>),
+}
+
+fn map_def<T, U, F>(option: Option<T>, default: U, f: F) -> Option<U> where F: FnOnce(T) -> U {
+  match option {
+    None => Some(default),
+    Some(x) => Some(f(x))
+  }
+}
+
+impl Statement {
+  pub fn push(self, st: Self) -> Self {
+    match self {
+      Statement::LetStatement(let_st, next_st) => Statement::LetStatement(let_st, Self::option_push(next_st, st)),
+      Statement::ControlStatement(ctrl_st, next_st) => Statement::ControlStatement(ctrl_st, Self::option_push(next_st, st)),
+      Statement::AssignStatement(asg_st, next_st) => Statement::AssignStatement(asg_st, Self::option_push(next_st, st))
+    }
+  }
+
+  // Push a `Statement` into an `Option<Box<Statement>>`.
+  //
+  // Used to implement `Statement::push`.
+  fn option_push(option: Option<Box<Statement>>, st: Statement) -> Option<Box<Statement>> {
+    map_def(option, Box::new(st.clone()), |next| Box::new(next.push(st)))
+  }
 }
 
 #[derive(Clone, Debug)]
@@ -285,7 +308,7 @@ macro_rules! sl_eval {
   // variable declaration
   ($ast:ident let $i:ident = $e:expr; $($r:tt)*) => {{
     let $i = E::from($e);
-    $ast.push(Statement::LetStatement(LetStatement::Let($i.reify_type(), Box::new($i.expr), None)));
+    //$ast.push(Statement::LetStatement(LetStatement::Let($i.reify_type(), Box::new($i.expr), None)));
     sl_eval!($ast $($r)*)
   }};
 
