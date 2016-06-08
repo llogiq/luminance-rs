@@ -153,6 +153,10 @@ fn map_def<T, U, F>(option: Option<T>, default: U, f: F) -> Option<U> where F: F
 }
 
 impl Statement {
+  pub fn new_let<T>(t: Type, e: E<T>) -> Self {
+    Statement::LetStatement(LetStatement::Let(t, Box::new(e.expr)), None)
+  }
+
   pub fn push(self, st: Self) -> Self {
     match self {
       Statement::LetStatement(let_st, next_st) => Statement::LetStatement(let_st, Self::option_push(next_st, st)),
@@ -171,7 +175,7 @@ impl Statement {
 
 #[derive(Clone, Debug)]
 pub enum LetStatement {
-  Let(Type, Box<Expr>, Option<Box<LetStatement>>)
+  Let(Type, Box<Expr>)
 }
 
 #[derive(Clone, Debug)]
@@ -308,8 +312,8 @@ macro_rules! sl_eval {
   // variable declaration
   ($ast:ident let $i:ident = $e:expr; $($r:tt)*) => {{
     let $i = E::from($e);
-    //$ast.push(Statement::LetStatement(LetStatement::Let($i.reify_type(), Box::new($i.expr), None)));
-    sl_eval!($ast $($r)*)
+    let ast2 = $ast.map(|a| a.push(Statement::new_let($i.reify_type(), $i)));
+    sl_eval!(ast2 $($r)*)
   }};
 
   // function declaration
@@ -345,14 +349,13 @@ macro_rules! sl_eval {
   }};
 
   // terminal macro
-  ($ast:ident) => {{ }}
+  ($ast:ident) => {{ $ast }}
 }
 
 macro_rules! sl_fun_def {
   ($($t:tt)*) => {{
-    let mut ast: Vec<Statement> = Vec::new();
+    let ast: Option<Statement> = None;
     sl_eval!(ast $($t)*);
-    ast
   }}
 }
 
