@@ -17,6 +17,7 @@ pub enum Expr {
   Vec2(Box<Expr>, Box<Expr>),
   Vec3(Box<Expr>, Box<Expr>, Box<Expr>),
   Vec4(Box<Expr>, Box<Expr>, Box<Expr>, Box<Expr>),
+  V(String)
 }
 
 #[derive(Clone, Debug)]
@@ -26,7 +27,7 @@ pub struct E<T> {
 }
 
 impl<T> E<T> {
-  fn new(e: Expr) -> Self {
+  pub fn new(e: Expr) -> Self {
     E {
       expr: e,
       _t: PhantomData
@@ -35,23 +36,23 @@ impl<T> E<T> {
 }
 
 pub trait ReifyType {
-  fn reify_type(&self) -> Type;
+  fn reify_type() -> Type;
 }
 
-impl ReifyType for E<i32> {
-  fn reify_type(&self) -> Type { Type::I32 }
+impl ReifyType for i32 {
+  fn reify_type() -> Type { Type::I32 }
 }
 
-impl ReifyType for E<u32> {
-  fn reify_type(&self) -> Type { Type::U32 }
+impl ReifyType for u32 {
+  fn reify_type() -> Type { Type::U32 }
 }
 
-impl ReifyType for E<f32> {
-  fn reify_type(&self) -> Type { Type::F32 }
+impl ReifyType for f32 {
+  fn reify_type() -> Type { Type::F32 }
 }
 
-impl ReifyType for E<bool> {
-  fn reify_type(&self) -> Type { Type::Bool }
+impl ReifyType for bool {
+  fn reify_type() -> Type { Type::Bool }
 }
 
 macro_rules! impl_from {
@@ -174,8 +175,8 @@ impl Statement {
     Statement::Empty
   }
 
-  pub fn new_let<T>(t: Type, e: E<T>) -> Self {
-    Statement::LetStatement(LetStatement::Let(t, Box::new(e.expr)), None)
+  pub fn new_let<T>(identifier: String, t: Type, e: E<T>) -> Self {
+    Statement::LetStatement(LetStatement::Let(identifier, t, Box::new(e.expr)), None)
   }
 
   pub fn new_if_else(cond: E<bool>, st_true: Statement, st_false: Statement) -> Self {
@@ -184,6 +185,10 @@ impl Statement {
 
   pub fn new_return<T>(e: E<T>) -> Self {
     Statement::Return(Box::new(e.expr))
+  }
+
+  pub fn new_assign<T>(i: E<T>, e: E<T>) -> Self {
+    Statement::AssignStatement(AssignStatement::Assign(Box::new(i.expr), Box::new(e.expr)), None)
   }
 
   pub fn push(self, st: Self) -> Self {
@@ -206,7 +211,7 @@ impl Statement {
 
 #[derive(Clone, Debug)]
 pub enum LetStatement {
-  Let(Type, Box<Expr>)
+  Let(String, Type, Box<Expr>)
 }
 
 #[derive(Clone, Debug)]
@@ -337,9 +342,13 @@ macro_rules! sl_eval {
   }};
 
   // variable declaration
-  ($ast:ident let $i:ident = $e:expr; $($r:tt)*) => {{
-    let $i = E::from($e);
-    let ast = $ast.push(Statement::new_let($i.reify_type(), $i));
+  ($ast:ident let $id:ident : $t:ty = $e:expr; $($r:tt)*) => {{
+    let id = String::from(stringify!($id));
+    let e = E::from($e);
+    let $id: E<$t> = E::new(Expr::V(id.clone()));
+
+    let ast = $ast.push(Statement::new_let(id, <$t as ReifyType>::reify_type(), e.clone()));
+
     sl_eval!(ast $($r)*)
   }};
 
@@ -354,7 +363,9 @@ macro_rules! sl_eval {
   }};
 
   // assignment
-  ($ast:ident $v:ident = $e:expr;) => {{
+  ($ast:ident $v:ident = $e:expr; $($r:tt)*) => {{
+    let ast = $ast.push(Statement::new_assign($v.clone(), E::from($e)));
+    sl_eval!(ast $($r)*)
   }};
 
   // when
