@@ -178,6 +178,44 @@ impl_not!([bool; 4]);
 #[derive(Copy, Clone, Debug)]
 pub struct Binding(u32);
 
+/// A shader stage gathers inputs, outputs, uniforms, functions and main declaration.
+#[derive(Clone, Debug)]
+pub struct Stage {
+  pub inputs: Vec<(String, Type)>,
+  pub outputs: Vec<(String, Type)>,
+  pub uniforms: Vec<(String, Type)>,
+  pub functions: Vec<(String, Fun)>,
+  pub main: Scope
+}
+
+impl Stage {
+  pub fn new() -> Self {
+    Stage {
+      inputs: Vec::new(),
+      outputs: Vec::new(),
+      uniforms: Vec::new(),
+      functions: Vec::new(),
+      main: Scope::Empty
+    }
+  }
+
+  pub fn push_input(&mut self, id: &str, ty: Type) {
+    self.inputs.push((id.into(), ty));
+  }
+
+  pub fn push_output(&mut self, id: &str, ty: Type) {
+    self.outputs.push((id.into(), ty));
+  }
+
+  pub fn push_uniform(&mut self, id: &str, ty: Type) {
+    self.uniforms.push((id.into(), ty));
+  }
+
+  pub fn push_fun(&mut self, id: &str, fun: Fun) {
+    self.functions.push((id.into(), fun));
+  }
+}
+
 #[derive(Clone, Debug)]
 pub enum Scope {
   Empty,
@@ -386,7 +424,7 @@ macro_rules! sl_scope_st {
   }};
 
   // terminal macro
-  ($ast:ident) => {{ $ast }}
+  ($ast:ident) => {{ $ast }};
 }
 
 /// Macro used to define a scope. A scope can be used as function body or control statement body.
@@ -402,26 +440,38 @@ macro_rules! sl_scope {
 #[macro_export]
 macro_rules! sl_stage_st {
   // main entry of the shader
-  (fn main() { $($body:tt)* }) => {{
-    sl_scope!($($body)*)
+  ($stage:ident fn main() { $($body:tt)* }) => {{
+    let main_scope = sl_scope!($($body)*);
+
+    $stage.main = main_scope;
   }};
 
   // define a function returning nothing
-  (fn $fun_name:ident ( $( $arg:ident : $arg_ty:ty ),* ) { $($body:tt)* } $($r:tt)*) => {{
+  ($stage:ident fn $fun_name:ident ( $( $arg:ident : $arg_ty:ty ),* ) { $($body:tt)* } $($r:tt)*) => {{
     $( let $arg: E<$arg_ty> = E::new(Expr::V(stringify!($arg).into())); )*
-    let $fun_name = Fun::new(stringify!($fun_name), None, vec![ $( (stringify!($arg).into(), <$arg_ty as ReifyType>::reify_type()) ),* ], sl_scope!($($body)*));
+    let fun = Fun::new(stringify!($fun_name), None, vec![ $( (stringify!($arg).into(), <$arg_ty as ReifyType>::reify_type()) ),* ], sl_scope!($($body)*));
 
-    sl_stage_st!($($r)*)
+    $stage.push_fun(stringify!($fun_name), fun);
+
+    // insert $fun_name into what comes next so that we can use it later on
+    sl_stage_st!($stage $($r)*)
   }};
 
   // define a function with return type
-  (fn $fun_name:ident ( ) -> $ret_type:ty { $($body:tt)* } $($r:tt)*) => {{
-    sl_stage_st!($($r)*)
+  ($stage:ident fn $fun_name:ident ( ) -> $ret_type:ty { $($body:tt)* } $($r:tt)*) => {{
+    sl_stage_st!($stage $($r)*)
   }};
+
+  // terminal macro
+  ($stage:ident) => {{ }};
 }
 
 /// Macro used to define a shader stage.
 #[macro_export]
 macro_rules! sl_stage {
-  () => {{ }}
+  ($($t:tt)*) => {{
+    let mut stage = Stage::new();
+    sl_stage_st!(stage $($t)*);
+    stage
+  }}
 }
