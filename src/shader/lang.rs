@@ -329,21 +329,21 @@ pub enum Type {
   Struct(Box<[Type]>)
 }
 
-/// Eval something in a scope.
+/// Scope statements.
 #[macro_export]
-macro_rules! sl_eval {
-  // input declaration
-  ($ast:ident let in $i:ident : $t:ty; $($r:tt)*) => {{
-    sl_eval!($($r)*)
-  }};
+macro_rules! sl_scope_st {
+  // // input declaration
+  // ($ast:ident let in $i:ident : $t:ty; $($r:tt)*) => {{
+  //   sl_scope_st!($($r)*)
+  // }};
 
-  // out declaration
-  ($ast:ident let out $i:ident : $t:ty;) => {{
-  }};
+  // // out declaration
+  // ($ast:ident let out $i:ident : $t:ty;) => {{
+  // }};
 
-  // uniform declaration
-  ($ast:ident uniform $i:ident : $t:ty;) => {{
-  }};
+  // // uniform declaration
+  // ($ast:ident uniform $i:ident : $t:ty;) => {{
+  // }};
 
   // variable declaration
   ($ast:ident let $id:ident : $t:ty = $e:expr; $($r:tt)*) => {{
@@ -353,31 +353,19 @@ macro_rules! sl_eval {
 
     let ast = $ast.push(Statement::new_let(id, <$t as ReifyType>::reify_type(), e.clone()));
 
-    sl_eval!(ast $($r)*)
-  }};
-
-  // function declaration
-  ($ast:ident fn $i:ident ($(,)*) -> $ret_type:ty { $($st:stmt)* }) => {{
+    sl_scope_st!(ast $($r)*)
   }};
 
   // early return
   ($ast:ident return $e:expr; $($r:tt)*) => {{
     let ast = $ast.push(Statement::new_return(E::from($e)));
-    sl_eval!(ast $($r)*)
+    sl_scope_st!(ast $($r)*)
   }};
 
   // assignment
   ($ast:ident $v:ident = $e:expr; $($r:tt)*) => {{
     let ast = $ast.push(Statement::new_assign($v.clone(), E::from($e)));
-    sl_eval!(ast $($r)*)
-  }};
-
-  // when
-  ($ast:ident when ($cond:expr) { $($st:stmt)* }) => {{
-  }};
-
-  // unless
-  ($ast:ident unless ($cond:expr) { $($st:stmt)* }) => {{
+    sl_scope_st!(ast $($r)*)
   }};
 
   // if else
@@ -386,7 +374,7 @@ macro_rules! sl_eval {
     let st_false = sl_scope!($($st_false)*);
     let ast = $ast.push(Statement::new_if_else($cond.into(), st_true, st_false));
 
-    sl_eval!(ast $($r)*)
+    sl_scope_st!(ast $($r)*)
   }};
 
   // for loop
@@ -401,18 +389,18 @@ macro_rules! sl_eval {
   ($ast:ident) => {{ $ast }}
 }
 
-/// Macro used to define a scope, introducing statements.
+/// Macro used to define a scope. A scope can be used as function body or control statement body.
 #[macro_export]
 macro_rules! sl_scope {
   ($($t:tt)*) => {{
     let ast: Statement = Statement::new();
-    sl_eval!(ast $($t)*)
+    sl_scope_st!(ast $($t)*)
   }}
 }
 
-/// Macro used to define a shader stage.
+/// Stage statements.
 #[macro_export]
-macro_rules! sl_stage {
+macro_rules! sl_stage_st {
   // main entry of the shader
   (fn main() { $($body:tt)* }) => {{
     sl_scope!($($body)*)
@@ -422,14 +410,18 @@ macro_rules! sl_stage {
   (fn $fun_name:ident ( $( $arg:ident : $arg_ty:ty ),* ) { $($body:tt)* } $($r:tt)*) => {{
     $( let $arg: E<$arg_ty> = E::new(Expr::V(stringify!($arg).into())); )*
     let $fun_name = Fun::new(stringify!($fun_name), None, vec![ $( (stringify!($arg).into(), <$arg_ty as ReifyType>::reify_type()) ),* ], sl_scope!($($body)*));
-    println!("{:?}", $fun_name);
 
-    sl_stage!($($r)*)
+    sl_stage_st!($($r)*)
   }};
 
   // define a function with return type
   (fn $fun_name:ident ( ) -> $ret_type:ty { $($body:tt)* } $($r:tt)*) => {{
-    sl_scope!($($body)*)
-    sl_stage!($($r)*)
+    sl_stage_st!($($r)*)
   }};
+}
+
+/// Macro used to define a shader stage.
+#[macro_export]
+macro_rules! sl_stage {
+  () => {{ }}
 }
