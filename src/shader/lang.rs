@@ -34,8 +34,28 @@ impl<T> E<T> {
     }
   }
 
+  pub fn lt(&self, rhs: &Self) -> E<bool> {
+    E::new(Expr::BinOp(BinOp::LT, Box::new(self.expr.clone()), Box::new(rhs.expr.clone())))
+  }
+
+  pub fn lte(&self, rhs: &Self) -> E<bool> {
+    E::new(Expr::BinOp(BinOp::LTE, Box::new(self.expr.clone()), Box::new(rhs.expr.clone())))
+  }
+
+  pub fn gt(&self, rhs: &Self) -> E<bool> {
+    E::new(Expr::BinOp(BinOp::GT, Box::new(self.expr.clone()), Box::new(rhs.expr.clone())))
+  }
+
+  pub fn gte(&self, rhs: &Self) -> E<bool> {
+    E::new(Expr::BinOp(BinOp::GTE, Box::new(self.expr.clone()), Box::new(rhs.expr.clone())))
+  }
+
   pub fn eq(&self, rhs: &Self) -> E<bool> {
     E::new(Expr::BinOp(BinOp::Eq, Box::new(self.expr.clone()), Box::new(rhs.expr.clone())))
+  }
+
+  pub fn ne(&self, rhs: &Self) -> E<bool> {
+    E::new(Expr::BinOp(BinOp::NE, Box::new(self.expr.clone()), Box::new(rhs.expr.clone())))
   }
 }
 
@@ -274,6 +294,7 @@ pub enum BinOp {
   GT, // >
   GTE, // >=
   Eq, // ==
+  NE, // !=
 }
 
 #[derive(Clone, Debug)]
@@ -387,8 +408,8 @@ macro_rules! sl_eval {
 
   // if else
   ($ast:ident if ($cond:expr) { $($st_true:tt)* } else { $($st_false:tt)* $($r:tt)* }) => {{
-    let st_true = sl!($($st_true)*);
-    let st_false = sl!($($st_false)*);
+    let st_true = sl_scope!($($st_true)*);
+    let st_false = sl_scope!($($st_false)*);
     let ast = $ast.push(Statement::new_if_else(E::from($cond), st_true, st_false));
 
     sl_eval!(ast $($r)*)
@@ -406,8 +427,9 @@ macro_rules! sl_eval {
   ($ast:ident) => {{ $ast }}
 }
 
+/// Macro used to define a scope, introducing statements.
 #[macro_export]
-macro_rules! sl {
+macro_rules! sl_scope {
   ($($t:tt)*) => {{
     let ast: Statement = Statement::new();
     sl_eval!(ast $($t)*)
