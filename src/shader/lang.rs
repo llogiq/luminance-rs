@@ -249,6 +249,10 @@ impl Scope {
     Scope::ControlStatement(ControlStatement::If(Box::new(cond.expr), Box::new(st_true), Some(IfRest::Else(Box::new(st_false)))), None)
   }
 
+  pub fn new_while(cond: E<bool>, st: Scope) -> Self {
+    Scope::ControlStatement(ControlStatement::While(Box::new(cond.expr), Box::new(st)), None)
+  }
+
   pub fn new_return<T>(e: E<T>) -> Self {
     Scope::Return(Box::new(e.expr))
   }
@@ -410,7 +414,7 @@ macro_rules! sl_scope_st {
   }};
 
   // if else
-  ($ast:ident if $cond:expr { $($st_true:tt)* } else { $($st_false:tt)* } $($r:tt)*) => {{
+  ($ast:ident if ($cond:expr) { $($st_true:tt)* } else { $($st_false:tt)* } $($r:tt)*) => {{
     let st_true = sl_scope!($($st_true)*);
     let st_false = sl_scope!($($st_false)*);
     let ast = $ast.push(Scope::new_if_else($cond.into(), st_true, st_false));
@@ -427,11 +431,15 @@ macro_rules! sl_scope_st {
   }};
 
   // for loop
-  ($ast:ident for ($i:ident : $t:ty = $e:expr ; $cond:expr ; $post_st:stmt) { $($body_st:stmt)* }) => {{
+  ($ast:ident for ($i:ident : $t:ty = $e:expr ; $cond:expr ; $($post_st:tt)*) { $($body_st:stmt)* }) => {{
   }};
 
   // while loop
-  ($ast:ident while ($cond:expr) { $($body_st:stmt)* }) => {{
+  ($ast:ident while ($cond:expr) { $($st:stmt)* } $($r:tt)*) => {{
+    let st = sl_scope!($($st)*);
+    let ast = $ast.push(Scope::new_while($cond.into(), st));
+
+    sl_scope_st!(ast $($r)*)
   }};
 
   // expression; terminal
