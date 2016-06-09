@@ -13,7 +13,7 @@ pub enum Expr {
   Bool(bool),
   UnaOp(UnaOp, Box<Expr>),
   BinOp(BinOp, Box<Expr>, Box<Expr>),
-  Fun(FunName, Box<[Box<Expr>]>),
+  Fun(String, Box<[Box<Expr>]>),
   Vec2(Box<Expr>, Box<Expr>),
   Vec3(Box<Expr>, Box<Expr>, Box<Expr>),
   Vec4(Box<Expr>, Box<Expr>, Box<Expr>, Box<Expr>),
@@ -299,38 +299,22 @@ pub enum BinOp {
 
 #[derive(Clone, Debug)]
 pub struct Fun {
-  name: FunName,
+  name: String,
   ret_type: Option<Type>,
-  signature: Box<[Type]>,
+  args: Vec<(String, Type)>,
   body: Option<Statement> // None if built-in // TODO
 }
 
-#[derive(Clone, Debug)]
-pub enum FunName {
-  Sin,
-  Cos,
-  Tan,
-  ASin,
-  ACos,
-  ATan,
-  SinH,
-  CosH,
-  TanH,
-  ASinH,
-  ACosH,
-  ATanH,
-  Pow,
-  Exp,
-  Log,
-  Sqrt,
-  ISqrt,
-  Abs,
-  Sign,
-  Floor,
-  Round,
-  Ceil,
-  Fract,
-  UserDefined(Binding)
+impl Fun {
+  /// Create a new user-defined function definition.
+  pub fn new(name: &str, ret_type: Option<Type>, args: Vec<(String, Type)>, body: Statement) -> Self {
+    Fun {
+      name: name.into(),
+      ret_type: ret_type,
+      args: args,
+      body: Some(body)
+    }
+  }
 }
 
 #[derive(Clone, Debug)]
@@ -343,16 +327,6 @@ pub enum Type {
   Vec3(Box<Type>),
   Vec4(Box<Type>),
   Struct(Box<[Type]>)
-}
-
-// sinf
-fn sin_def() -> Fun {
-  Fun {
-    name: FunName::Sin,
-    ret_type: Some(Type::F32),
-    signature: Box::new([Type::F32]),
-    body: None
-  }
 }
 
 /// SL grammar.
@@ -434,4 +408,28 @@ macro_rules! sl_scope {
     let ast: Statement = Statement::new();
     sl_eval!(ast $($t)*)
   }}
+}
+
+/// Macro used to define a shader stage.
+#[macro_export]
+macro_rules! sl_stage {
+  // main entry of the shader
+  (fn main() { $($body:tt)* }) => {{
+    sl_scope!($($body)*)
+  }};
+
+  // define a function returning nothing
+  (fn $fun_name:ident ( $( $arg:ident : $arg_ty:ty ),* ) { $($body:tt)* } $($r:tt)*) => {{
+    $( let $arg: E<$arg_ty> = E::new(Expr::V(stringify!($arg).into())); )*
+    let $fun_name = Fun::new(stringify!($fun_name), None, vec![ $( (stringify!($arg).into(), <$arg_ty as ReifyType>::reify_type()) ),* ], sl_scope!($($body)*));
+    println!("{:?}", $fun_name);
+
+    sl_stage!($($r)*)
+  }};
+
+  // define a function with return type
+  (fn $fun_name:ident ( ) -> $ret_type:ty { $($body:tt)* } $($r:tt)*) => {{
+    sl_scope!($($body)*)
+    sl_stage!($($r)*)
+  }};
 }
