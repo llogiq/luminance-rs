@@ -448,6 +448,7 @@ macro_rules! sl_stage_st {
 
   // define a function returning nothing
   ($stage:ident fn $fun_name:ident ( $( $arg:ident : $arg_ty:ty ),* ) { $($body:tt)* } $($r:tt)*) => {{
+    // insert arguments into current scope so that we can use them
     $( let $arg: E<$arg_ty> = E::new(Expr::V(stringify!($arg).into())); )*
     let fun = Fun::new(stringify!($fun_name), None, vec![ $( (stringify!($arg).into(), <$arg_ty as ReifyType>::reify_type()) ),* ], sl_scope!($($body)*));
 
@@ -458,7 +459,14 @@ macro_rules! sl_stage_st {
   }};
 
   // define a function with return type
-  ($stage:ident fn $fun_name:ident ( ) -> $ret_type:ty { $($body:tt)* } $($r:tt)*) => {{
+  ($stage:ident fn $fun_name:ident ( $( $arg:ident : $arg_ty:ty ),* ) -> $ret_type:ty { $($body:tt)* } $($r:tt)*) => {{
+    // insert arguments into current scope so that we can use them
+    $( let $arg: E<$arg_ty> = E::new(Expr::V(stringify!($arg).into())); )*
+    let fun = Fun::new(stringify!($fun_name), Some(<$ret_type as ReifyType>::reify_type()), vec![ $( (stringify!($arg).into(), <$arg_ty as ReifyType>::reify_type()) ),* ], sl_scope!($($body)*));
+
+    $stage.push_fun(stringify!($fun_name), fun);
+
+    // insert $fun_name into what comes next so that we can use it later on
     sl_stage_st!($stage $($r)*)
   }};
 
