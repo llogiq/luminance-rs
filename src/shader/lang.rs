@@ -241,6 +241,10 @@ impl Scope {
     Scope::LetStatement(LetStatement::Let(identifier, t, Box::new(e.expr)), None)
   }
 
+  pub fn new_if(cond: E<bool>, st: Scope) -> Self {
+    Scope::ControlStatement(ControlStatement::If(Box::new(cond.expr), Box::new(st), None), None)
+  }
+
   pub fn new_if_else(cond: E<bool>, st_true: Scope, st_false: Scope) -> Self {
     Scope::ControlStatement(ControlStatement::If(Box::new(cond.expr), Box::new(st_true), Some(IfRest::Else(Box::new(st_false)))), None)
   }
@@ -399,11 +403,6 @@ macro_rules! sl_scope_st {
     $ast.push(Scope::new_return(E::from($e)))
   }};
 
-  // expression; terminal
-  ($ast:ident $e:expr) => {{
-    $ast.push(Scope::new_return(E::from($e)))
-  }};
-
   // assignment
   ($ast:ident $v:ident = $e:expr; $($r:tt)*) => {{
     let ast = $ast.push(Scope::new_assign($v.clone(), E::from($e)));
@@ -411,10 +410,18 @@ macro_rules! sl_scope_st {
   }};
 
   // if else
-  ($ast:ident if ($cond:expr) { $($st_true:tt)* } else { $($st_false:tt)* $($r:tt)* }) => {{
+  ($ast:ident if $cond:expr { $($st_true:tt)* } else { $($st_false:tt)* } $($r:tt)*) => {{
     let st_true = sl_scope!($($st_true)*);
     let st_false = sl_scope!($($st_false)*);
     let ast = $ast.push(Scope::new_if_else($cond.into(), st_true, st_false));
+
+    sl_scope_st!(ast $($r)*)
+  }};
+
+  // if
+  ($ast:ident if ($cond:expr) { $($st:tt)* } $($r:tt)*) => {{
+    let st = sl_scope!($($st)*);
+    let ast = $ast.push(Scope::new_if($cond.into(), st));
 
     sl_scope_st!(ast $($r)*)
   }};
@@ -425,6 +432,11 @@ macro_rules! sl_scope_st {
 
   // while loop
   ($ast:ident while ($cond:expr) { $($body_st:stmt)* }) => {{
+  }};
+
+  // expression; terminal
+  ($ast:ident $e:expr) => {{
+    $ast.push(Scope::new_return(E::from($e)))
   }};
 
   // terminal macro
