@@ -400,7 +400,9 @@ macro_rules! sl_scope_st {
   }};
 
   // expression
-  //($ast:ident $e:expr
+  ($ast:ident $e:expr) => {{
+    $ast.push(Scope::new_return(E::from($e)))
+  }};
 
   // assignment
   ($ast:ident $v:ident = $e:expr; $($r:tt)*) => {{
