@@ -329,7 +329,7 @@ pub enum Type {
   Struct(Box<[Type]>)
 }
 
-/// SL grammar.
+/// Eval something in a scope.
 #[macro_export]
 macro_rules! sl_eval {
   // input declaration
@@ -384,7 +384,7 @@ macro_rules! sl_eval {
   ($ast:ident if ($cond:expr) { $($st_true:tt)* } else { $($st_false:tt)* $($r:tt)* }) => {{
     let st_true = sl_scope!($($st_true)*);
     let st_false = sl_scope!($($st_false)*);
-    let ast = $ast.push(Statement::new_if_else(E::from($cond), st_true, st_false));
+    let ast = $ast.push(Statement::new_if_else($cond.into(), st_true, st_false));
 
     sl_eval!(ast $($r)*)
   }};
