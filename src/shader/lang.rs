@@ -394,11 +394,13 @@ macro_rules! sl_scope_st {
     sl_scope_st!(ast $($r)*)
   }};
 
-  // early return
-  ($ast:ident return $e:expr; $($r:tt)*) => {{
-    let ast = $ast.push(Scope::new_return(E::from($e)));
-    sl_scope_st!(ast $($r)*)
+  // early return; terminal
+  ($ast:ident return $e:expr;) => {{
+    $ast.push(Scope::new_return(E::from($e)))
   }};
+
+  // expression
+  //($ast:ident $e:expr
 
   // assignment
   ($ast:ident $v:ident = $e:expr; $($r:tt)*) => {{
