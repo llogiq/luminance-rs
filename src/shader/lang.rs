@@ -179,11 +179,11 @@ impl_not!([bool; 4]);
 pub struct Binding(u32);
 
 #[derive(Clone, Debug)]
-pub enum Statement {
+pub enum Scope {
   Empty,
-  LetStatement(LetStatement, Option<Box<Statement>>),
-  ControlStatement(ControlStatement, Option<Box<Statement>>),
-  AssignStatement(AssignStatement, Option<Box<Statement>>),
+  LetStatement(LetStatement, Option<Box<Scope>>),
+  ControlStatement(ControlStatement, Option<Box<Scope>>),
+  AssignStatement(AssignStatement, Option<Box<Scope>>),
   Return(Box<Expr>)
 }
 
@@ -194,41 +194,41 @@ fn map_def<T, U, F>(option: Option<T>, default: U, f: F) -> Option<U> where F: F
   }
 }
 
-impl Statement {
+impl Scope {
   pub fn new() -> Self {
-    Statement::Empty
+    Scope::Empty
   }
 
   pub fn new_let<T>(identifier: String, t: Type, e: E<T>) -> Self {
-    Statement::LetStatement(LetStatement::Let(identifier, t, Box::new(e.expr)), None)
+    Scope::LetStatement(LetStatement::Let(identifier, t, Box::new(e.expr)), None)
   }
 
-  pub fn new_if_else(cond: E<bool>, st_true: Statement, st_false: Statement) -> Self {
-    Statement::ControlStatement(ControlStatement::If(Box::new(cond.expr), Box::new(st_true), Some(IfRest::Else(Box::new(st_false)))), None)
+  pub fn new_if_else(cond: E<bool>, st_true: Scope, st_false: Scope) -> Self {
+    Scope::ControlStatement(ControlStatement::If(Box::new(cond.expr), Box::new(st_true), Some(IfRest::Else(Box::new(st_false)))), None)
   }
 
   pub fn new_return<T>(e: E<T>) -> Self {
-    Statement::Return(Box::new(e.expr))
+    Scope::Return(Box::new(e.expr))
   }
 
   pub fn new_assign<T>(i: E<T>, e: E<T>) -> Self {
-    Statement::AssignStatement(AssignStatement::Assign(Box::new(i.expr), Box::new(e.expr)), None)
+    Scope::AssignStatement(AssignStatement::Assign(Box::new(i.expr), Box::new(e.expr)), None)
   }
 
   pub fn push(self, st: Self) -> Self {
     match self {
-      Statement::Empty => st,
-      Statement::LetStatement(let_st, next_st) => Statement::LetStatement(let_st, Self::option_push(next_st, st)),
-      Statement::ControlStatement(ctrl_st, next_st) => Statement::ControlStatement(ctrl_st, Self::option_push(next_st, st)),
-      Statement::AssignStatement(asg_st, next_st) => Statement::AssignStatement(asg_st, Self::option_push(next_st, st)),
-      a@Statement::Return(..) => a // short-circuit what’s next
+      Scope::Empty => st,
+      Scope::LetStatement(let_st, next_st) => Scope::LetStatement(let_st, Self::option_push(next_st, st)),
+      Scope::ControlStatement(ctrl_st, next_st) => Scope::ControlStatement(ctrl_st, Self::option_push(next_st, st)),
+      Scope::AssignStatement(asg_st, next_st) => Scope::AssignStatement(asg_st, Self::option_push(next_st, st)),
+      a@Scope::Return(..) => a // short-circuit what’s next
     }
   }
 
-  // Push a `Statement` into an `Option<Box<Statement>>`.
+  // Push a `Scope` into an `Option<Box<Scope>>`.
   //
-  // Used to implement `Statement::push`.
-  fn option_push(option: Option<Box<Statement>>, st: Statement) -> Option<Box<Statement>> {
+  // Used to implement `Scope::push`.
+  fn option_push(option: Option<Box<Scope>>, st: Scope) -> Option<Box<Scope>> {
     map_def(option, Box::new(st.clone()), |next| Box::new(next.push(st)))
   }
 }
@@ -240,15 +240,15 @@ pub enum LetStatement {
 
 #[derive(Clone, Debug)]
 pub enum ControlStatement {
-  If(Box<Expr>, Box<Statement>, Option<IfRest>),
-  For(LetStatement, Box<Expr>, ForIterStatement, Box<Statement>),
-  While(Box<Expr>, Box<Statement>)
+  If(Box<Expr>, Box<Scope>, Option<IfRest>),
+  For(LetStatement, Box<Expr>, ForIterStatement, Box<Scope>),
+  While(Box<Expr>, Box<Scope>)
 }
 
 #[derive(Clone, Debug)]
 pub enum IfRest {
-  Else(Box<Statement>),
-  ElseIf(Box<Expr>, Box<Statement>, Option<Box<IfRest>>),
+  Else(Box<Scope>),
+  ElseIf(Box<Expr>, Box<Scope>, Option<Box<IfRest>>),
 }
 
 #[derive(Clone, Debug)]
@@ -302,12 +302,12 @@ pub struct Fun {
   name: String,
   ret_type: Option<Type>,
   args: Vec<(String, Type)>,
-  body: Option<Statement> // None if built-in // TODO
+  body: Option<Scope> // None if built-in // TODO
 }
 
 impl Fun {
   /// Create a new user-defined function definition.
-  pub fn new(name: &str, ret_type: Option<Type>, args: Vec<(String, Type)>, body: Statement) -> Self {
+  pub fn new(name: &str, ret_type: Option<Type>, args: Vec<(String, Type)>, body: Scope) -> Self {
     Fun {
       name: name.into(),
       ret_type: ret_type,
@@ -351,20 +351,20 @@ macro_rules! sl_scope_st {
     let e = E::from($e);
     let $id: E<$t> = E::new(Expr::V(id.clone()));
 
-    let ast = $ast.push(Statement::new_let(id, <$t as ReifyType>::reify_type(), e.clone()));
+    let ast = $ast.push(Scope::new_let(id, <$t as ReifyType>::reify_type(), e.clone()));
 
     sl_scope_st!(ast $($r)*)
   }};
 
   // early return
   ($ast:ident return $e:expr; $($r:tt)*) => {{
-    let ast = $ast.push(Statement::new_return(E::from($e)));
+    let ast = $ast.push(Scope::new_return(E::from($e)));
     sl_scope_st!(ast $($r)*)
   }};
 
   // assignment
   ($ast:ident $v:ident = $e:expr; $($r:tt)*) => {{
-    let ast = $ast.push(Statement::new_assign($v.clone(), E::from($e)));
+    let ast = $ast.push(Scope::new_assign($v.clone(), E::from($e)));
     sl_scope_st!(ast $($r)*)
   }};
 
@@ -372,7 +372,7 @@ macro_rules! sl_scope_st {
   ($ast:ident if ($cond:expr) { $($st_true:tt)* } else { $($st_false:tt)* $($r:tt)* }) => {{
     let st_true = sl_scope!($($st_true)*);
     let st_false = sl_scope!($($st_false)*);
-    let ast = $ast.push(Statement::new_if_else($cond.into(), st_true, st_false));
+    let ast = $ast.push(Scope::new_if_else($cond.into(), st_true, st_false));
 
     sl_scope_st!(ast $($r)*)
   }};
@@ -393,7 +393,7 @@ macro_rules! sl_scope_st {
 #[macro_export]
 macro_rules! sl_scope {
   ($($t:tt)*) => {{
-    let ast: Statement = Statement::new();
+    let ast: Scope = Scope::new();
     sl_scope_st!(ast $($t)*)
   }}
 }
