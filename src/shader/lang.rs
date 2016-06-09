@@ -13,7 +13,7 @@ pub enum Expr {
   Bool(bool),
   UnaOp(UnaOp, Box<Expr>),
   BinOp(BinOp, Box<Expr>, Box<Expr>),
-  Fun(String, Box<[Box<Expr>]>),
+  Fun(String, Vec<Box<Expr>>),
   Vec2(Box<Expr>, Box<Expr>),
   Vec3(Box<Expr>, Box<Expr>, Box<Expr>),
   Vec4(Box<Expr>, Box<Expr>, Box<Expr>, Box<Expr>),
@@ -442,6 +442,13 @@ macro_rules! sl_scope_st {
     sl_scope_st!(ast $($r)*)
   }};
 
+  // expression; non-terminal
+  ($ast:ident $e:expr; $($r:tt)*) => {{
+    let ast = $ast.push(Scope::new_return(E::from($e)))
+
+    sl_scope_st!(ast $($r)*)
+  }};
+
   // expression; terminal
   ($ast:ident $e:expr) => {{
     $ast.push(Scope::new_return(E::from($e)))
@@ -475,10 +482,10 @@ macro_rules! sl_stage_st {
     // insert arguments into current scope so that we can use them
     $( let $arg: E<$arg_ty> = E::new(Expr::V(stringify!($arg).into())); )*
     let fun = Fun::new(stringify!($fun_name), None, vec![ $( (stringify!($arg).into(), <$arg_ty as ReifyType>::reify_type()) ),* ], sl_scope!($($body)*));
+    let $fun_name: E<&Fn($($arg_ty),*)> = E::new(Expr::V(stringify!($fun_name).into()));
 
     $stage.push_fun(stringify!($fun_name), fun);
 
-    // insert $fun_name into what comes next so that we can use it later on
     sl_stage_st!($stage $($r)*)
   }};
 
