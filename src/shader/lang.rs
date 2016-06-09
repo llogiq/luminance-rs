@@ -399,7 +399,7 @@ macro_rules! sl_scope_st {
     $ast.push(Scope::new_return(E::from($e)))
   }};
 
-  // expression
+  // expression; terminal
   ($ast:ident $e:expr) => {{
     $ast.push(Scope::new_return(E::from($e)))
   }};
