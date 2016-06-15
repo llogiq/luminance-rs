@@ -185,7 +185,7 @@ pub struct Stage {
   pub outputs: Vec<(String, Type)>,
   pub uniforms: Vec<(String, Type)>,
   pub functions: Vec<(String, Fun)>,
-  pub main: Scope
+  pub main: Scope<()>
 }
 
 impl Stage {
@@ -217,11 +217,11 @@ impl Stage {
 }
 
 #[derive(Clone, Debug)]
-pub enum Scope {
+pub enum Scope<T> {
   Empty,
-  LetStatement(LetStatement, Option<Box<Scope>>),
-  ControlStatement(ControlStatement, Option<Box<Scope>>),
-  AssignStatement(AssignStatement, Option<Box<Scope>>),
+  LetStatement(LetStatement<T>, Option<Box<Scope<T>>>),
+  ControlStatement(ControlStatement<T>, Option<Box<Scope<T>>>),
+  AssignStatement(AssignStatement, Option<Box<Scope<T>>>),
   Return(Box<Expr>)
 }
 
@@ -232,7 +232,7 @@ fn map_def<T, U, F>(option: Option<T>, default: U, f: F) -> Option<U> where F: F
   }
 }
 
-impl Scope {
+impl<T> Scope<T> {
   pub fn new() -> Self {
     Scope::Empty
   }
@@ -241,15 +241,15 @@ impl Scope {
     Scope::LetStatement(LetStatement::Let(identifier, t, Box::new(e.expr)), None)
   }
 
-  pub fn new_if(cond: E<bool>, st: Scope) -> Self {
+  pub fn new_if(cond: E<bool>, st: Self) -> Self {
     Scope::ControlStatement(ControlStatement::If(Box::new(cond.expr), Box::new(st), None), None)
   }
 
-  pub fn new_if_else(cond: E<bool>, st_true: Scope, st_false: Scope) -> Self {
+  pub fn new_if_else(cond: E<bool>, st_true: Self, st_false: Self) -> Self {
     Scope::ControlStatement(ControlStatement::If(Box::new(cond.expr), Box::new(st_true), Some(IfRest::Else(Box::new(st_false)))), None)
   }
 
-  pub fn new_while(cond: E<bool>, st: Scope) -> Self {
+  pub fn new_while(cond: E<bool>, st: Self) -> Self {
     Scope::ControlStatement(ControlStatement::While(Box::new(cond.expr), Box::new(st)), None)
   }
 
@@ -274,27 +274,27 @@ impl Scope {
   // Push a `Scope` into an `Option<Box<Scope>>`.
   //
   // Used to implement `Scope::push`.
-  fn option_push(option: Option<Box<Scope>>, st: Scope) -> Option<Box<Scope>> {
+  fn option_push(option: Option<Box<Self>>, st: Self) -> Option<Box<Self>> {
     map_def(option, Box::new(st.clone()), |next| Box::new(next.push(st)))
   }
 }
 
 #[derive(Clone, Debug)]
-pub enum LetStatement {
+pub enum LetStatement<T> {
   Let(String, Type, Box<Expr>)
 }
 
 #[derive(Clone, Debug)]
-pub enum ControlStatement {
-  If(Box<Expr>, Box<Scope>, Option<IfRest>),
-  For(LetStatement, Box<Expr>, ForIterStatement, Box<Scope>),
-  While(Box<Expr>, Box<Scope>)
+pub enum ControlStatement<T> {
+  If(Box<Expr>, Box<Scope<T>>, Option<IfRest<T>>),
+  For(LetStatement<T>, Box<Expr>, ForIterStatement, Box<Scope<T>>),
+  While(Box<Expr>, Box<Scope<T>>)
 }
 
 #[derive(Clone, Debug)]
-pub enum IfRest {
-  Else(Box<Scope>),
-  ElseIf(Box<Expr>, Box<Scope>, Option<Box<IfRest>>),
+pub enum IfRest<T> {
+  Else(Box<Scope<T>>),
+  ElseIf(Box<Expr>, Box<Scope<T>>, Option<Box<IfRest<T>>>),
 }
 
 #[derive(Clone, Debug)]
@@ -344,11 +344,11 @@ pub enum BinOp {
 }
 
 #[derive(Clone, Debug)]
-pub struct Fun {
+pub struct Fun<T> {
   name: String,
   ret_type: Option<Type>,
   args: Vec<(String, Type)>,
-  body: Option<Scope> // None if built-in // TODO
+  body: Option<Scope<T>> // None if built-in // TODO
 }
 
 impl Fun {
