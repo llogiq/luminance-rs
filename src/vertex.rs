@@ -53,12 +53,14 @@ pub fn vertex_format_size(vf: &VertexFormat) -> usize {
 ///
 /// - the type of the component (`Type`);
 /// - the dimension of the component (`Dim`).
+#[derive(Clone, Copy, Debug)]
 pub struct VertexComponentFormat {
   pub component_type: Type,
   pub dim: Dim
 }
 
 /// Possible type of vertex components.
+#[derive(Clone, Copy, Debug)]
 pub enum Type {
   Integral,
   Unsigned,
@@ -67,6 +69,7 @@ pub enum Type {
 }
 
 /// Possible dimension of vertex components.
+#[derive(Clone, Copy, Debug)]
 pub enum Dim {
   Dim1,
   Dim2,
