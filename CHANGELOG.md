@@ -1,3 +1,7 @@
+### 0.6.1
+
+- Added documentation field in Cargo.toml.
+
 ## 0.6.0
 
 - Removed `Default` implementation for `Framebuffer` and added a new `default()` method, taking the
