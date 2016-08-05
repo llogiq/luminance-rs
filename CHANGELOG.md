@@ -1,3 +1,13 @@
+### 0.6.2
+
+- Added `upload_part_raw` and `upload_raw` to `Texture`, enabling to upload raw texels instead of
+  texels directly.
+- Added `RawEncoding` to `Pixel`.
+
+### 0.6.1
+
+- Added documentation field in Cargo.toml.
+
 ## 0.6.0
 
 - Removed `Default` implementation for `Framebuffer` and added a new `default()` method, taking the
