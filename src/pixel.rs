@@ -6,6 +6,9 @@
 pub trait Pixel {
   /// Encoding of a single pixel. It should match the `PixelFormat` mapping.
   type Encoding;
+  /// Raw encoding of a single pixel; i.e. that is, encoding of underlying values in contiguous
+  /// texture memory. It should be match the `PixelFormat` mapping.
+  type RawEncoding;
 
   fn pixel_format() -> PixelFormat;
 }
@@ -71,6 +74,7 @@ pub struct RGB8UI;
 
 impl Pixel for RGB8UI {
   type Encoding = (u8, u8, u8);
+  type RawEncoding = u8;
 
   fn pixel_format() -> PixelFormat {
     PixelFormat {
@@ -88,6 +92,7 @@ pub struct RGBA8UI;
 
 impl Pixel for RGBA8UI {
   type Encoding = (u8, u8, u8, u8);
+  type RawEncoding = u8;
 
   fn pixel_format() -> PixelFormat {
     PixelFormat {
@@ -107,6 +112,7 @@ pub struct RGB32F;
 
 impl Pixel for RGB32F {
   type Encoding = (f32, f32, f32);
+  type RawEncoding = f32;
 
   fn pixel_format() -> PixelFormat {
     PixelFormat {
@@ -124,6 +130,7 @@ pub struct RGBA32F;
 
 impl Pixel for RGBA32F {
   type Encoding = (f32, f32, f32, f32);
+  type RawEncoding = f32;
 
   fn pixel_format() -> PixelFormat {
     PixelFormat {
@@ -143,6 +150,7 @@ pub struct Depth32F;
 
 impl Pixel for Depth32F {
   type Encoding = f32;
+  type RawEncoding = f32;
 
   fn pixel_format() -> PixelFormat {
     PixelFormat {
