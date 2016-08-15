@@ -240,6 +240,8 @@ pub trait HasTexture {
   /// Upload raw texels to the texture’s memory.
   fn upload_part_raw<L, D, P>(tex: &Self::ATexture, gen_mipmaps: bool, offset: D::Offset, size: D::Size, texels: &Vec<P::RawEncoding>)
     where L: Layerable, D::Offset: Copy, D::Size: Copy, D: Dimensionable, P: Pixel;
+  /// Retrieve the texels as a collection of P::RawEncoding.
+  fn get_raw_texels<P>(tex: &Self::ATexture) -> Vec<P::RawEncoding> where P: Pixel;
 }
 
 /// Texture.
@@ -329,6 +331,10 @@ impl<C, L, D, P> Texture<C, L, D, P>
       where D::Offset: Copy,
             D::Size: Copy {
     self.upload_part_raw(gen_mipmaps, D::zero_offset(), self.size, texels)
+  }
+
+  pub fn get_raw_texels(&self) -> Vec<P::RawEncoding> where P: Pixel {
+    C::get_raw_texels::<P>(&self.repr)
   }
 }
 
