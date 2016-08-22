@@ -5,6 +5,9 @@
 use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Neg, Not, Sub};
 
+/// Expression.
+///
+/// An expression can be assigned and bound to.
 #[derive(Clone, Debug)]
 pub enum Expr {
   I32(i32),
@@ -20,6 +23,7 @@ pub enum Expr {
   V(String)
 }
 
+/// Typed-expression.
 #[derive(Clone, Debug)]
 pub struct E<T> {
   expr: Expr,
@@ -59,6 +63,7 @@ impl<T> E<T> {
   }
 }
 
+/// Class of types that can reify to `Type`, giving runtime information on the carried type.
 pub trait ReifyType {
   fn reify_type() -> Type;
 }
@@ -175,9 +180,6 @@ impl_not!([bool; 2]);
 impl_not!([bool; 3]);
 impl_not!([bool; 4]);
 
-#[derive(Copy, Clone, Debug)]
-pub struct Binding(u32);
-
 /// A shader stage gathers inputs, outputs, uniforms, functions and main declaration.
 #[derive(Clone, Debug)]
 pub struct Stage {
@@ -216,6 +218,9 @@ impl Stage {
   }
 }
 
+/// A function scope.
+///
+/// This type is used to describe how statements are related to each others.
 #[derive(Clone, Debug)]
 pub enum Scope<T> {
   Empty,
@@ -223,13 +228,6 @@ pub enum Scope<T> {
   ControlStatement(ControlStatement<T>, Option<Box<Scope<T>>>),
   AssignStatement(AssignStatement, Option<Box<Scope<T>>>),
   Return(Box<Expr>)
-}
-
-fn map_def<T, U, F>(option: Option<T>, default: U, f: F) -> Option<U> where F: FnOnce(T) -> U {
-  match option {
-    None => Some(default),
-    Some(x) => Some(f(x))
-  }
 }
 
 impl<T> Scope<T> {
@@ -513,4 +511,9 @@ macro_rules! sl_stage {
     sl_stage_st!(stage $($t)*);
     stage
   }}
+}
+
+/// Map a function on an `Option`. If not possible, use the default argument as result.
+fn map_def<T, U, F>(option: Option<T>, default: U, f: F) -> Option<U> where F: FnOnce(T) -> U {
+  option.map_or_else(Some(default), f)
 }
