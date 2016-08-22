@@ -1,3 +1,7 @@
+### 0.6.3
+
+- Added `get_raw_texels` to `Texture`.
+
 ### 0.6.2
 
 - Added `upload_part_raw` and `upload_raw` to `Texture`, enabling to upload raw texels instead of
