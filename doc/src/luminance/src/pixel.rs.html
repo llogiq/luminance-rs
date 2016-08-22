@@ -266,8 +266,8 @@
 <span class='doccomment'>/// Does a `PixelFormat` represent a color?</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_color_pixel</span>(<span class='ident'>f</span>: <span class='ident'>PixelFormat</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
   <span class='kw'>match</span> <span class='ident'>f</span>.<span class='ident'>format</span> {
-      <span class='ident'>Format</span>::<span class='ident'>Depth</span>(_) <span class='op'>=&gt;</span> <span class='bool-val'>false</span>
-    , _ <span class='op'>=&gt;</span> <span class='bool-val'>true</span>
+      <span class='ident'>Format</span>::<span class='ident'>Depth</span>(_) <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>
+    , _ <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>
   }
 }
 
