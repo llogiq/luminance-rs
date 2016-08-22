@@ -149,8 +149,6 @@ pub trait Uniformable<C>: Sized where C: HasUniform {
   fn reify_type() -> Type;
   /// Retrieve the `Dim` of the uniform.
   fn dim() -> Dim;
-  /// Retrieve the number of elements (if array), 1 otherwise.
-  fn size(&self) -> usize;
 }
 
 impl<C> Uniformable<C> for i32 where C: HasUniform {
@@ -161,8 +159,6 @@ impl<C> Uniformable<C> for i32 where C: HasUniform {
   fn reify_type() -> Type { Type::Integral }
 
   fn dim() -> Dim { Dim::Dim1 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [i32; 2] where C: HasUniform {
@@ -173,8 +169,6 @@ impl<C> Uniformable<C> for [i32; 2] where C: HasUniform {
   fn reify_type() -> Type { Type::Integral }
 
   fn dim() -> Dim { Dim::Dim2 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [i32; 3] where C: HasUniform {
@@ -185,8 +179,6 @@ impl<C> Uniformable<C> for [i32; 3] where C: HasUniform {
   fn reify_type() -> Type { Type::Integral }
 
   fn dim() -> Dim { Dim::Dim3 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [i32; 4] where C: HasUniform {
@@ -197,8 +189,6 @@ impl<C> Uniformable<C> for [i32; 4] where C: HasUniform {
   fn reify_type() -> Type { Type::Integral }
 
   fn dim() -> Dim { Dim::Dim4 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<'a, C> Uniformable<C> for &'a [i32] where C: HasUniform {
@@ -209,8 +199,6 @@ impl<'a, C> Uniformable<C> for &'a [i32] where C: HasUniform {
   fn reify_type() -> Type { Type::Integral }
 
   fn dim() -> Dim { Dim::Dim1 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[i32; 2]] where C: HasUniform {
@@ -221,8 +209,6 @@ impl<'a, C> Uniformable<C> for &'a [[i32; 2]] where C: HasUniform {
   fn reify_type() -> Type { Type::Integral }
 
   fn dim() -> Dim { Dim::Dim2 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[i32; 3]] where C: HasUniform {
@@ -233,8 +219,6 @@ impl<'a, C> Uniformable<C> for &'a [[i32; 3]] where C: HasUniform {
   fn reify_type() -> Type { Type::Integral }
 
   fn dim() -> Dim { Dim::Dim3 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[i32; 4]] where C: HasUniform {
@@ -245,8 +229,6 @@ impl<'a, C> Uniformable<C> for &'a [[i32; 4]] where C: HasUniform {
   fn reify_type() -> Type { Type::Integral }
 
   fn dim() -> Dim { Dim::Dim4 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<C> Uniformable<C> for u32 where C: HasUniform {
@@ -257,8 +239,6 @@ impl<C> Uniformable<C> for u32 where C: HasUniform {
   fn reify_type() -> Type { Type::Unsigned }
 
   fn dim() -> Dim { Dim::Dim1 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [u32; 2] where C: HasUniform {
@@ -269,8 +249,6 @@ impl<C> Uniformable<C> for [u32; 2] where C: HasUniform {
   fn reify_type() -> Type { Type::Unsigned }
 
   fn dim() -> Dim { Dim::Dim2 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [u32; 3] where C: HasUniform {
@@ -281,8 +259,6 @@ impl<C> Uniformable<C> for [u32; 3] where C: HasUniform {
   fn reify_type() -> Type { Type::Unsigned }
 
   fn dim() -> Dim { Dim::Dim3 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [u32; 4] where C: HasUniform {
@@ -293,8 +269,6 @@ impl<C> Uniformable<C> for [u32; 4] where C: HasUniform {
   fn reify_type() -> Type { Type::Unsigned }
 
   fn dim() -> Dim { Dim::Dim4 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<'a, C> Uniformable<C> for &'a [u32] where C: HasUniform {
@@ -305,8 +279,6 @@ impl<'a, C> Uniformable<C> for &'a [u32] where C: HasUniform {
   fn reify_type() -> Type { Type::Unsigned }
 
   fn dim() -> Dim { Dim::Dim1 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[u32; 2]] where C: HasUniform {
@@ -317,8 +289,6 @@ impl<'a, C> Uniformable<C> for &'a [[u32; 2]] where C: HasUniform {
   fn reify_type() -> Type { Type::Unsigned }
 
   fn dim() -> Dim { Dim::Dim2 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[u32; 3]] where C: HasUniform {
@@ -329,8 +299,6 @@ impl<'a, C> Uniformable<C> for &'a [[u32; 3]] where C: HasUniform {
   fn reify_type() -> Type { Type::Unsigned }
 
   fn dim() -> Dim { Dim::Dim3 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[u32; 4]] where C: HasUniform {
@@ -341,8 +309,6 @@ impl<'a, C> Uniformable<C> for &'a [[u32; 4]] where C: HasUniform {
   fn reify_type() -> Type { Type::Unsigned }
 
   fn dim() -> Dim { Dim::Dim4 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<C> Uniformable<C> for f32 where C: HasUniform {
@@ -353,8 +319,6 @@ impl<C> Uniformable<C> for f32 where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim1 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [f32; 2] where C: HasUniform {
@@ -365,8 +329,6 @@ impl<C> Uniformable<C> for [f32; 2] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim2 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [f32; 3] where C: HasUniform {
@@ -377,8 +339,6 @@ impl<C> Uniformable<C> for [f32; 3] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim3 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [f32; 4] where C: HasUniform {
@@ -389,8 +349,6 @@ impl<C> Uniformable<C> for [f32; 4] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim4 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<'a, C> Uniformable<C> for &'a [f32] where C: HasUniform {
@@ -401,8 +359,6 @@ impl<'a, C> Uniformable<C> for &'a [f32] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim1 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[f32; 2]] where C: HasUniform {
@@ -413,8 +369,6 @@ impl<'a, C> Uniformable<C> for &'a [[f32; 2]] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim2 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[f32; 3]] where C: HasUniform {
@@ -425,8 +379,6 @@ impl<'a, C> Uniformable<C> for &'a [[f32; 3]] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim3 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[f32; 4]] where C: HasUniform {
@@ -437,8 +389,6 @@ impl<'a, C> Uniformable<C> for &'a [[f32; 4]] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim4 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<C> Uniformable<C> for M22 where C: HasUniform {
@@ -449,8 +399,6 @@ impl<C> Uniformable<C> for M22 where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim22 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for M33 where C: HasUniform {
@@ -461,8 +409,6 @@ impl<C> Uniformable<C> for M33 where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim33 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for M44 where C: HasUniform {
@@ -473,8 +419,6 @@ impl<C> Uniformable<C> for M44 where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim44 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<'a, C> Uniformable<C> for &'a [M22] where C: HasUniform {
@@ -485,8 +429,6 @@ impl<'a, C> Uniformable<C> for &'a [M22] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim22 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [M33] where C: HasUniform {
@@ -497,8 +439,6 @@ impl<'a, C> Uniformable<C> for &'a [M33] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim33 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [M44] where C: HasUniform {
@@ -509,8 +449,6 @@ impl<'a, C> Uniformable<C> for &'a [M44] where C: HasUniform {
   fn reify_type() -> Type { Type::Floating }
 
   fn dim() -> Dim { Dim::Dim44 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<C> Uniformable<C> for bool where C: HasUniform {
@@ -521,8 +459,6 @@ impl<C> Uniformable<C> for bool where C: HasUniform {
   fn reify_type() -> Type { Type::Boolean }
 
   fn dim() -> Dim { Dim::Dim1 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [bool; 2] where C: HasUniform {
@@ -533,8 +469,6 @@ impl<C> Uniformable<C> for [bool; 2] where C: HasUniform {
   fn reify_type() -> Type { Type::Boolean }
 
   fn dim() -> Dim { Dim::Dim2 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [bool; 3] where C: HasUniform {
@@ -545,8 +479,6 @@ impl<C> Uniformable<C> for [bool; 3] where C: HasUniform {
   fn reify_type() -> Type { Type::Boolean }
 
   fn dim() -> Dim { Dim::Dim3 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<C> Uniformable<C> for [bool; 4] where C: HasUniform {
@@ -557,8 +489,6 @@ impl<C> Uniformable<C> for [bool; 4] where C: HasUniform {
   fn reify_type() -> Type { Type::Boolean }
 
   fn dim() -> Dim { Dim::Dim4 }
-
-  fn size(&self) -> usize { 1 }
 }
 
 impl<'a, C> Uniformable<C> for &'a [bool] where C: HasUniform {
@@ -569,8 +499,6 @@ impl<'a, C> Uniformable<C> for &'a [bool] where C: HasUniform {
   fn reify_type() -> Type { Type::Boolean }
 
   fn dim() -> Dim { Dim::Dim1 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[bool; 2]] where C: HasUniform {
@@ -581,8 +509,6 @@ impl<'a, C> Uniformable<C> for &'a [[bool; 2]] where C: HasUniform {
   fn reify_type() -> Type { Type::Boolean }
 
   fn dim() -> Dim { Dim::Dim2 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[bool; 3]] where C: HasUniform {
@@ -593,8 +519,6 @@ impl<'a, C> Uniformable<C> for &'a [[bool; 3]] where C: HasUniform {
   fn reify_type() -> Type { Type::Boolean }
 
   fn dim() -> Dim { Dim::Dim3 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C> Uniformable<C> for &'a [[bool; 4]] where C: HasUniform {
@@ -605,8 +529,6 @@ impl<'a, C> Uniformable<C> for &'a [[bool; 4]] where C: HasUniform {
   fn reify_type() -> Type { Type::Boolean }
 
   fn dim() -> Dim { Dim::Dim4 }
-
-  fn size(&self) -> usize { self.len() }
 }
 
 impl<'a, C, L, D, P> Uniformable<C> for &'a Texture<C, L, D, P>
@@ -634,6 +556,4 @@ impl<'a, C, L, D, P> Uniformable<C> for &'a Texture<C, L, D, P>
       texture::Dim::Cubemap => Dim::Cubemap,
     }
   }
-
-  fn size(&self) -> usize { 1 }
 }
