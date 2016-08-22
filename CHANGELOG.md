@@ -1,3 +1,12 @@
+### 0.6.4
+
+- Backends now have more information to work with about uniforms. That enables using reification
+  techniques to validate types, dimensions, sizes, etc…
+
+### 0.6.3
+
+- Added `get_raw_texels` to `Texture`.
+
 ### 0.6.2
 
 - Added `upload_part_raw` and `upload_raw` to `Texture`, enabling to upload raw texels instead of
