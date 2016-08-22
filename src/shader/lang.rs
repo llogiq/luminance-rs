@@ -187,7 +187,7 @@ pub struct Stage {
   pub outputs: Vec<(String, Type)>,
   pub uniforms: Vec<(String, Type)>,
   pub functions: Vec<(String, Fun)>,
-  pub main: Scope<()>
+  pub main: Scope
 }
 
 impl Stage {
@@ -222,15 +222,15 @@ impl Stage {
 ///
 /// This type is used to describe how statements are related to each others.
 #[derive(Clone, Debug)]
-pub enum Scope<T> {
+pub enum Scope {
   Empty,
-  LetStatement(LetStatement<T>, Option<Box<Scope<T>>>),
-  ControlStatement(ControlStatement<T>, Option<Box<Scope<T>>>),
-  AssignStatement(AssignStatement, Option<Box<Scope<T>>>),
+  LetStatement(LetStatement, Option<Box<Scope>>),
+  ControlStatement(ControlStatement, Option<Box<Scope>>),
+  AssignStatement(AssignStatement, Option<Box<Scope>>),
   Return(Box<Expr>)
 }
 
-impl<T> Scope<T> {
+impl Scope {
   pub fn new() -> Self {
     Scope::Empty
   }
@@ -278,21 +278,21 @@ impl<T> Scope<T> {
 }
 
 #[derive(Clone, Debug)]
-pub enum LetStatement<T> {
+pub enum LetStatement {
   Let(String, Type, Box<Expr>)
 }
 
 #[derive(Clone, Debug)]
-pub enum ControlStatement<T> {
-  If(Box<Expr>, Box<Scope<T>>, Option<IfRest<T>>),
-  For(LetStatement<T>, Box<Expr>, ForIterStatement, Box<Scope<T>>),
-  While(Box<Expr>, Box<Scope<T>>)
+pub enum ControlStatement {
+  If(Box<Expr>, Box<Scope>, Option<IfRest>),
+  For(LetStatement, Box<Expr>, ForIterStatement, Box<Scope>),
+  While(Box<Expr>, Box<Scope>)
 }
 
 #[derive(Clone, Debug)]
-pub enum IfRest<T> {
-  Else(Box<Scope<T>>),
-  ElseIf(Box<Expr>, Box<Scope<T>>, Option<Box<IfRest<T>>>),
+pub enum IfRest {
+  Else(Box<Scope>),
+  ElseIf(Box<Expr>, Box<Scope>, Option<Box<IfRest>>),
 }
 
 #[derive(Clone, Debug)]
@@ -342,11 +342,11 @@ pub enum BinOp {
 }
 
 #[derive(Clone, Debug)]
-pub struct Fun<T> {
+pub struct Fun {
   name: String,
   ret_type: Option<Type>,
   args: Vec<(String, Type)>,
-  body: Option<Scope<T>> // None if built-in // TODO
+  body: Option<Scope> // None if built-in // TODO
 }
 
 impl Fun {
@@ -515,5 +515,5 @@ macro_rules! sl_stage {
 
 /// Map a function on an `Option`. If not possible, use the default argument as result.
 fn map_def<T, U, F>(option: Option<T>, default: U, f: F) -> Option<U> where F: FnOnce(T) -> U {
-  option.map_or_else(Some(default), f)
+  Some(option.map_or(default, f))
 }
