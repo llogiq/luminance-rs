@@ -1,3 +1,7 @@
+## 0.7.0
+
+- Uniforms have new semantics; mapping them cannot fail anymore but it can be emitted warnings.
+
 ### 0.6.4
 
 - Backends now have more information to work with about uniforms. That enables using reification
