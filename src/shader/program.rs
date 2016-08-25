@@ -56,7 +56,7 @@ pub trait HasProgram: HasStage + HasUniform {
   /// Free a program.
   fn free_program(program: &mut Self::Program);
   /// Map a uniform name to its uniform representation. Can fail with `ProgramError`.
-  fn map_uniform(program: &Self::Program, name: String, ty: uniform::Type, dim: uniform::Dim) -> Result<Self::U, ProgramError>;
+  fn map_uniform(program: &Self::Program, name: String, ty: uniform::Type, dim: uniform::Dim) -> (Self::U, Option<UniformWarning>);
   /// Bulk update of uniforms. The update closure should contain the code used to update as many
   /// uniforms as wished.
   fn update_uniforms<F>(program: &Self::Program, f: F) where F: Fn();
@@ -117,18 +117,24 @@ impl<'a, C> ProgramProxy<'a, C> where C: HasProgram {
     }
   }
 
-  pub fn uniform<T>(&self, name: &str) -> Result<Uniform<C, T>, ProgramError> where T: Uniformable<C> {
+  pub fn uniform<T>(&self, name: &str) -> (Uniform<C, T>, Option<UniformWarning>) where T: Uniformable<C> {
     // gather information about the uniform so that backend can proceed with runtime reification and
     // validation
     let ty = T::reify_type();
     let dim = T::dim();
-    C::map_uniform(&self.repr, String::from(name), ty, dim).map(|u| Uniform::new(u))
+
+    let (u, w) = C::map_uniform(&self.repr, String::from(name), ty, dim);
+    (Uniform::new(u), w)
   }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum ProgramError {
   LinkFailed(String),
-  InactiveUniform(String),
-  UniformTypeMismatch(String)
+}
+
+#[derive(Clone, Debug)]
+pub enum UniformWarning {
+  Inactive(String),
+  TypeMismatch(String)
 }
